@@ -198,18 +198,18 @@ def swap_regions(view, edit, region1, region2):
     current_cursor_position = view.sel()[0].a
     if current_cursor_position < region1.a:
         new_cursor_position = current_cursor_position
-    elif region1.contains(current_cursor_position):
-        # {^....}....{..}
-        # {..}....{^....}
-        new_cursor_position = current_cursor_position + region2.b - region1.b
-    elif region1.a > current_cursor_position:
-        # {..}.^..{.....}
-        # {.....}.^..{..}
-        new_cursor_position = current_cursor_position + region1.size() - region2.size()
     elif region2.contains(current_cursor_position):
         # {..}....{.^...}
         # {.^...}....{..}
         new_cursor_position = current_cursor_position - region2.a + region1.a
+    elif region1.contains(current_cursor_position):
+        # {^....}....{..}
+        # {..}....{^....}
+        new_cursor_position = current_cursor_position + region2.b - region1.b
+    elif region1.b <= current_cursor_position < region2.a:
+        # {..}.^..{.....}
+        # {.....}.^..{..}
+        new_cursor_position = current_cursor_position + region1.size() - region2.size()
     else:
         new_cursor_position = current_cursor_position
 
@@ -253,13 +253,14 @@ def move_current_node(view, edit, up=True):
 
     # Найти предыдущую ноду (если это нода уровнем выше, огорчиться и выйти)
     swap_headline_region = all_headlines[swap_headline_index]
-    if get_header_level(view.substr(swap_headline_region)) > current_headline_level:
+    if get_header_level(view.substr(swap_headline_region)) < current_headline_level:
         return
 
     current_section_region = current_section_info.section_region
     swap_section_region = orgmode_structure.get_section_info(point=swap_headline_region.a).section_region
 
     swap_regions(view, edit, current_section_region, swap_section_region)
+    view.show(view.sel()[0].a)
 
 
 class ZorgmodeCycleAll(sublime_plugin.TextCommand):
