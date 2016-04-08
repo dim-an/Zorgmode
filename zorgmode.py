@@ -1,10 +1,51 @@
 # -*- coding: utf-8 -*-
 
+import collections
 import itertools
 import re
 
 import sublime_plugin
 import sublime
+
+MAX_HEADLINE_LEVEL = 30
+
+class OrgmodeStructure(object):
+    SectionInfo = collections.namedtuple('SectionInfo',
+                                          'headline_region,headline_level,section_region,content_region')
+    def __init__(self, view):
+        self.view = view
+
+    def get_section_info(self, point=None):
+        view = self.view
+        if point is None:
+            if len(view.sel()) != 1:
+                return None
+            sel, = view.sel()
+            if not sel.empty():
+                return None
+            point = sel.a
+        current_line_region = view.line(point)
+        current_line = view.substr(current_line_region)
+        match = re.search(r'^\s*(([-+*]|[*]+)\s)(\s*\w+\b\s*|\s*)?', current_line)
+        if match is None:
+            return
+        current_headline_region = current_line_region
+        current_headline_level = get_header_level(view.substr(current_headline_region))
+
+        next_headline_re = '^[*]{{1,{}}}\s'.format(current_headline_level)
+        next_headline_region = view.find(next_headline_re, current_headline_region.b)
+        section_end = next_headline_region.a
+        if section_end <= current_headline_region.a:
+            section_end = view.size()
+
+        return self.SectionInfo(
+            headline_region=current_headline_region,
+            headline_level=current_headline_level,
+            section_region=sublime.Region(current_headline_region.a, section_end),
+            content_region=sublime.Region(current_headline_region.b, section_end))
+
+    def find_all_headlines(self, min_level=1, max_level=MAX_HEADLINE_LEVEL):
+        return find_all_headers(self.view, min_level=min_level, max_level=max_level)
 
 def cycle_todo_state(view, edit, forward=True):
     STATUS_LIST = ['', 'TODO', 'DONE']
@@ -27,7 +68,6 @@ def cycle_todo_state(view, edit, forward=True):
     status_start = match.end(1)
     spaced_status = match.group(3)
     status_end = match.end(3)
-
 
     # - понять какой таг у нас следующий
     try:
@@ -130,6 +170,98 @@ def get_folding_for_headers(view, header_region_list):
         prev_header_end = header_region.b
     return result
 
+def is_line_start(view, point):
+    return bool(view.classify(point) & sublime.CLASS_LINE_START)
+
+def swap_regions(view, edit, region1, region2):
+    if len(view.sel()) != 1 or not view.sel()[0].empty():
+        raise ValueError
+    if region1.intersects(region2):
+        raise ValueError
+    if region1.a > region2.a:
+        return swap_regions(view, edit, region2, region1)
+
+    if not is_line_start(view, region1.a) or not is_line_start(view, region1.b):
+        raise ValueError
+
+    if not is_line_start(view, region2.a) or (not is_line_start(view, region2.b) and region2.b != view.size()):
+        raise ValueError
+
+    added_new_line = False
+    if not is_line_start(view, region2.b):
+        assert region2.b == view.size()
+        view.insert(edit, view.size(), '\n')
+        region2 = sublime.Region(region2.a, region2.b + 1)
+        added_new_line = True
+
+    # find out new cursor position
+    current_cursor_position = view.sel()[0].a
+    if current_cursor_position < region1.a:
+        new_cursor_position = current_cursor_position
+    elif region1.contains(current_cursor_position):
+        # {^....}....{..}
+        # {..}....{^....}
+        new_cursor_position = current_cursor_position + region2.b - region1.b
+    elif region1.a > current_cursor_position:
+        # {..}.^..{.....}
+        # {.....}.^..{..}
+        new_cursor_position = current_cursor_position + region1.size() - region2.size()
+    elif region2.contains(current_cursor_position):
+        # {..}....{.^...}
+        # {.^...}....{..}
+        new_cursor_position = current_cursor_position - region2.a + region1.a
+    else:
+        new_cursor_position = current_cursor_position
+
+    text1 = view.substr(region1)
+    text2 = view.substr(region2)
+    view.erase(edit, region2)
+    view.insert(edit, region2.a, text1)
+    view.erase(edit, region1)
+    view.insert(edit, region1.a, text2)
+
+    view.sel().clear()
+    view.sel().add(sublime.Region(new_cursor_position))
+
+    if added_new_line:
+        view.erase(edit, sublime.Region(view.size() - 1, view.size()))
+
+
+def move_current_node(view, edit, up=True):
+    if len(view.sel()) != 1 or not view.sel()[0].empty():
+        return
+    
+    orgmode_structure = OrgmodeStructure(view)
+    # Найти текущую ноду
+    current_section_info = orgmode_structure.get_section_info()
+    current_headline_level = current_section_info.headline_level
+
+    # Понять её уровень
+    # Найти все ноды уровня нашей ноды или выше
+    all_headlines = orgmode_structure.find_all_headlines(max_level=current_headline_level)
+
+    current_headline_index = all_headlines.index(current_section_info.headline_region)
+
+    if up:
+        swap_headline_index = current_headline_index - 1
+    else:
+        swap_headline_index = current_headline_index + 1
+
+
+    if swap_headline_index < 0 or swap_headline_index >= len(all_headlines):
+        return
+
+    # Найти предыдущую ноду (если это нода уровнем выше, огорчиться и выйти)
+    swap_headline_region = all_headlines[swap_headline_index]
+    if get_header_level(view.substr(swap_headline_region)) > current_headline_level:
+        return
+
+    current_section_region = current_section_info.section_region
+    swap_section_region = orgmode_structure.get_section_info(point=swap_headline_region.a).section_region
+
+    swap_regions(view, edit, current_section_region, swap_section_region)
+
+
 class ZorgmodeCycleAll(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
@@ -163,3 +295,12 @@ class ZorgmodeCycleAll(sublime_plugin.TextCommand):
         else:
             # fold top_headers_folding
             view.fold(top_headers_folding)
+
+class ZorgmodeMoveNodeUp(sublime_plugin.TextCommand):
+    def run(self, edit):
+        move_current_node(self.view, edit, up=True)
+
+class ZorgmodeMoveNodeDown(sublime_plugin.TextCommand):
+    def run(self, edit):
+        move_current_node(self.view, edit, up=False)
+

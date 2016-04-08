@@ -35,5 +35,23 @@
                 "operator": "equal",
                 "operand": "text.org"
         }]
+    },
+    {
+        "keys": ["ctrl+shift+up"],
+        "command": "zorgmode_move_node_up",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "headline.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+down"],
+        "command": "zorgmode_move_node_down",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "headline.text.org"
+        }]
     }
 ]
