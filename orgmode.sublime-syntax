@@ -1,0 +1,11 @@
+%YAML 1.2
+---
+#file_extensions: [org]
+scope: text.org
+name: zorgmode
+
+contexts:
+    main:
+        - match: '^[*].*$'
+          scope: headline.text.org
+        

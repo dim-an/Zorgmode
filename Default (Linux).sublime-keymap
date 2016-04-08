@@ -1,0 +1,21 @@
+[
+	  /* Orgmode */
+    {
+        "keys": ["alt+shift+right"],
+        "command": "zorgmode_cycle_todo_state_forward",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "headline.text.org"
+        }]
+    },
+    {
+        "keys": ["alt+shift+left"],
+        "command": "zorgmode_cycle_todo_state_backward",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "headline.text.org"
+        }]
+    }
+]

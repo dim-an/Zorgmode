@@ -1,0 +1,5 @@
+# SYNTAX TEST "Packages/zorgmode/orgmode.sublime-syntax"
+* Some headline
+# <- headline.text.org
+Some text
+# <- .text.org
