@@ -17,5 +17,23 @@
                 "operator": "equal",
                 "operand": "headline.text.org"
         }]
+    },
+    {
+        "keys": ["ctrl+\\"],
+        "command": "zorgmode_cycle",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "headline.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+\\"],
+        "command": "zorgmode_cycle_all",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "text.org"
+        }]
     }
 ]
