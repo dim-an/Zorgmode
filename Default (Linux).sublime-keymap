@@ -71,5 +71,14 @@
                 "operator": "equal",
                 "operand": "list_entry.text.org"
         }]
+    },
+    {
+        "keys": ["ctrl+shift+a"],
+        "command": "zorgmode_move_to_archive",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "text.org"
+        }]
     }
 ]

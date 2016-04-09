@@ -358,3 +358,43 @@ class ZorgmodeToggleCheckbox(sublime_plugin.TextCommand):
         tick_mark = view.substr(tick_region)
         next_tick = {' ': 'X', 'X': ' '}.get(tick_mark, ' ')
         view.replace(edit, tick_region, next_tick)
+
+class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
+        current_filename = view.file_name()
+        if current_filename is None:
+            sublime.status_message("File doesn't have a name don't know where to put archive")
+            return
+        if current_filename.endswith('.org'):
+            archive_filename = current_filename + '_archive'
+        else:
+            archive_filename = current_filename + '.org_archive'
+
+        # Найти текущую секцию
+        orgmode_structure = OrgmodeStructure(view)
+        section_info = orgmode_structure.get_section_info()
+
+        # Привести её к уровню 1
+        section_text = view.substr(section_info.section_region)
+        if section_info.headline_level == 1:
+            level1_section_text = section_text
+        else:
+            level1_section_text = re.sub(
+                '^[*]{{{}}}'.format(section_info.headline_level - 1),
+                '',
+                section_text)
+        level1_section_text = '\n' + level1_section_text.strip('\n') + '\n'
+
+        # Записать в архивный файл
+        try:
+            with open(archive_filename, 'a') as outf:
+                outf.write(level1_section_text)
+        except IOError as e:
+            # Если не ок, жалуемся
+            sublime.error_message("can not use `{}' as archive file: {}".format(archive_filename, e))
+            return
+        # Если ok, удаляем секцию
+        view.erase(edit, section_info.section_region)
+        sublime.status_message("Entry is archived to `{}'".format(archive_filename))
+        return
