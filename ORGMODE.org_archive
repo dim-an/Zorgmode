@@ -1,0 +1,47 @@
+
+* DONE Сделать fold/unfold похожим на emacs
+  Должны сворачивать всё между заголовками
+
+* DONE Сделать возможность переводить TODO→DONE
+  [X] Написать ротацию статусов.
+  [X] Узнать как называется штука в emacs и назвать аналогично.
+  [X] Сделать ротацию в обе стороны.
+  [X] Повесить на удобные клавиши.
+
+* DONE Сделать fold/unfold all
+
+* DONE Сделать так, чтобы подсветка работала
+  Сделал синтаксисоспецифичную настройку подсветки [[https://forum.sublimetext.com/t/change-color-scheme-depending-on-file-type-open/2135/5]]
+  Живёт в [[/home/ermolovd/.config/sublime-text-3/Packages/User/orgmode.sublime-settings]]
+
+Есть питоноскрипты, которые умеют парсить orgmode:
+  - [[http://members.optusnet.com.au/~charles57/GTD/Orgnode.py]]
+  - [[http://lists.gnu.org/archive/html/emacs-orgmode/2011-04/msg00598.html]]
+  - [[https://github.com/bjonnh/PyOrgMode]]
+
+* DONE Написать тесты на TODO→DONE
+
+* DONE Сделать tick/un{tick [ ]
+** DONE реализовать синтаксис list-item
+нужно чтобы потом можно было клавиши на контекст повесить
+** DONE реализовать собственно переключение
+** DONE повесить переключение, на shift+alt+{right/left} в правильном контексте
+** DONE протестировать
+
+* DONE Перемещение нод не должно аффектить fold/unfold.
+
+* DONE Сделать перемещение нод по ctrl+shift+{up/down}
+
+* DONE Написать тесты на перемещения:
+  - [X] обычное перемещение
+  - [X] упираемся в края файла
+  - [X] упираемся в другой заголовок
+  - [X] сохранение позиции курсора
+  - [X] сохранение позиции курсора, если он стоит на границе 2х нод (в самом начале второй ноды)
+  - [X] сохранение fold/unfold
+
+* DONE Плохо работает перемещение 
+  * HEADLINE (move down)
+  ** SUBHEADLINE
+  * OTHER HEADLINE
+  - [ ] Протестировать
