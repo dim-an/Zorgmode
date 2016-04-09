@@ -1,6 +1,6 @@
 %YAML 1.2
 ---
-#file_extensions: [org]
+file_extensions: [org]
 scope: text.org
 name: zorgmode
 
