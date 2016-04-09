@@ -177,6 +177,34 @@ def get_folding_for_headers(view, header_region_list):
 def is_line_start(view, point):
     return bool(view.classify(point) & sublime.CLASS_LINE_START)
 
+def strictly_within(region1, region2):
+    return region2.a < region1.a <= region1.b < region2.b
+
+def project_point_after_swapping(region1, region2, point):
+    # NOTE: there is a tricky case when region1.b == region2.a
+    # In that case point moves with region2.
+
+    assert not region1.intersects(region2)
+    assert region1.b <= region2.a
+
+    # find out new cursor position
+    if point < region1.a:
+        return point
+    elif region2.contains(point):
+        # {..}....{.^...}
+        # {.^...}....{..}
+        return point - region2.a + region1.a
+    elif region1.contains(point):
+        # {^....}....{..}
+        # {..}....{^....}
+        return point + region2.b - region1.b
+    elif region1.b <= point < region2.a:
+        # {..}.^..{.....}
+        # {.....}.^..{..}
+        return point + region1.size() - region2.size()
+    else:
+        return point
+
 def swap_regions(view, edit, region1, region2):
     if len(view.sel()) != 1 or not view.sel()[0].empty():
         raise ValueError
@@ -200,22 +228,16 @@ def swap_regions(view, edit, region1, region2):
 
     # find out new cursor position
     current_cursor_position = view.sel()[0].a
-    if current_cursor_position < region1.a:
-        new_cursor_position = current_cursor_position
-    elif region2.contains(current_cursor_position):
-        # {..}....{.^...}
-        # {.^...}....{..}
-        new_cursor_position = current_cursor_position - region2.a + region1.a
-    elif region1.contains(current_cursor_position):
-        # {^....}....{..}
-        # {..}....{^....}
-        new_cursor_position = current_cursor_position + region2.b - region1.b
-    elif region1.b <= current_cursor_position < region2.a:
-        # {..}.^..{.....}
-        # {.....}.^..{..}
-        new_cursor_position = current_cursor_position + region1.size() - region2.size()
-    else:
-        new_cursor_position = current_cursor_position
+    new_cursor_position = project_point_after_swapping(region1, region2, current_cursor_position)
+
+    # make a list of folds to refold
+    region_to_refold_list = []
+    for folded_region in view.folded_regions():
+        if strictly_within(folded_region, region1) or strictly_within(folded_region, region2):
+            region_to_refold_list.append(
+                sublime.Region(
+                    project_point_after_swapping(region1, region2, folded_region.a),
+                    project_point_after_swapping(region1, region2, folded_region.b)))
 
     text1 = view.substr(region1)
     text2 = view.substr(region2)
@@ -229,6 +251,8 @@ def swap_regions(view, edit, region1, region2):
 
     if added_new_line:
         view.erase(edit, sublime.Region(view.size() - 1, view.size()))
+
+    view.fold(region_to_refold_list)
 
 
 def move_current_node(view, edit, up=True):
@@ -288,6 +312,8 @@ class ZorgmodeCycleAll(sublime_plugin.TextCommand):
 
         folded_regions = view.folded_regions()
 
+        # TODO: кажется можно просто сказать view.unfold(folded_regions)
+        # но сначала нужно написать тесты
         for region in folded_regions:
             view.unfold(region)
 

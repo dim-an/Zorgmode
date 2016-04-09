@@ -4,7 +4,7 @@
 import sublime
 from zorgtest import ZorgTestCase
 
-class TestMoveUp(ZorgTestCase):
+class TestMoveNode(ZorgTestCase):
     def setUp(self):
         self.view = sublime.active_window().new_file()
 
@@ -171,3 +171,64 @@ class TestMoveUp(ZorgTestCase):
             "text\n"
             "** Caption")
         self.assertEqual(self.getCursorPos(), (1, 1))
+
+    def test_respect_folding(self):
+        self.setText(
+            "* Caption {\n"
+            "some text}\n"
+            "* Caption 2\n"
+            "* Caption 3 {\n"
+            "text\n"
+            "** subsection\n"
+            "more text}")
+        self.setCursorPos(1, 2)
+        self.view.run_command('zorgmode_cycle_all')
+        try:
+            self.assertProperFolding()
+        except:
+            # do not want this test to spam output
+            raise RuntimeError("folding is broken")
+
+        self.view.run_command('zorgmode_move_node_down')
+        self.assertEqual(
+            self.getAllText(),
+            "* Caption 2\n"
+            "* Caption {\n"
+            "some text}\n"
+            "* Caption 3 {\n"
+            "text\n"
+            "** subsection\n"
+            "more text}")
+        self.assertProperFolding()
+
+        self.view.run_command('zorgmode_move_node_down')
+        self.assertEqual(
+            self.getAllText(),
+            "* Caption 2\n"
+            "* Caption 3 {\n"
+            "text\n"
+            "** subsection\n"
+            "more text}\n"
+            "* Caption {\n"
+            "some text}")
+
+    def assertProperFolding(self):
+        expected_folding = []
+
+        text = self.view.substr(sublime.Region(0, self.view.size()))
+
+        unmatched_braces = []
+        for i, c in enumerate(text):
+            if c not in "{}":
+                continue
+            elif c == '{':
+                unmatched_braces.append(i)
+            elif c == '}':
+                open_brace = unmatched_braces.pop()
+                close_brace = i
+                expected_folding.append(sublime.Region(open_brace+1, close_brace+1))
+            else:
+                raise AssertionError("internal error, shouldn't be reached")
+
+        actual_folding = self.view.folded_regions()
+        self.assertEqual(expected_folding, actual_folding)
