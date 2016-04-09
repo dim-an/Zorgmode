@@ -15,7 +15,7 @@ class OrgmodeStructure(object):
     def __init__(self, view):
         self.view = view
 
-    def get_section_info(self, point=None):
+    def get_line_region(self, point=None):
         view = self.view
         if point is None:
             if len(view.sel()) != 1:
@@ -24,7 +24,11 @@ class OrgmodeStructure(object):
             if not sel.empty():
                 return None
             point = sel.a
-        current_line_region = view.line(point)
+        return view.line(point)
+
+    def get_section_info(self, point=None):
+        view = self.view
+        current_line_region = self.get_line_region(point=point)
         current_line = view.substr(current_line_region)
         match = re.search(r'^\s*(([-+*]|[*]+)\s)(\s*\w+\b\s*|\s*)?', current_line)
         if match is None:
@@ -297,11 +301,34 @@ class ZorgmodeCycleAll(sublime_plugin.TextCommand):
             # fold top_headers_folding
             view.fold(top_headers_folding)
 
+
 class ZorgmodeMoveNodeUp(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=True)
+
 
 class ZorgmodeMoveNodeDown(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=False)
 
+
+class ZorgmodeToggleCheckbox(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
+        orgmode_structure = OrgmodeStructure(view)
+        line_region = orgmode_structure.get_line_region()
+        if not line_region:
+            return
+        line_text = view.substr(line_region)
+
+        match = re.match('^(?:\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+\[(.)\].*$', line_text)
+        if not match:
+            return
+
+        tick_region = sublime.Region(
+            line_region.a + match.start(1),
+            line_region.a + match.end(1))
+
+        tick_mark = view.substr(tick_region)
+        next_tick = {' ': 'X', 'X': ' '}.get(tick_mark, ' ')
+        view.replace(edit, tick_region, next_tick)

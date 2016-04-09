@@ -8,4 +8,5 @@ contexts:
     main:
         - match: '^[*].*$'
           scope: headline.text.org
-        
+        - match: '^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+.*$'
+          scope: list_entry.text.org

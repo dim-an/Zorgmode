@@ -53,5 +53,23 @@
                 "operator": "equal",
                 "operand": "headline.text.org"
         }]
+    },
+    {
+        "keys": ["alt+shift+right"],
+        "command": "zorgmode_toggle_checkbox",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "list_entry.text.org"
+        }]
+    },
+    {
+        "keys": ["alt+shift+left"],
+        "command": "zorgmode_toggle_checkbox",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "list_entry.text.org"
+        }]
     }
 ]

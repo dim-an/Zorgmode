@@ -4,12 +4,9 @@
 import sublime
 from zorgtest import ZorgTestCase
 
-version = sublime.version()
-
 class TestMoveUp(ZorgTestCase):
     def setUp(self):
         self.view = sublime.active_window().new_file()
-        # make sure we have a window to work with
 
     def tearDown(self):
         if self.view:

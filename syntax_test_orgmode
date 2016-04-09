@@ -3,3 +3,9 @@
 # <- headline.text.org
 Some text
 # <- .text.org
+ - entry
+# <- list_entry.text.org
+ * entry
+# <- list_entry.text.org
+* entry
+# <- headline.text.org
