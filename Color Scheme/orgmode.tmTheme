@@ -432,7 +432,18 @@
             <key>name</key>
             <string>zorgmode link</string>
             <key>scope</key>
-            <string>link.text.org</string>
+            <string>text.link.text.org</string>
+            <key>settings</key>
+            <dict>
+              <key>foreground</key>
+              <string>#FFFFAA</string>
+           </dict>
+        </dict>
+        <dict>
+            <key>name</key>
+            <string>zorgmode link</string>
+            <key>scope</key>
+            <string>reference.link.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
