@@ -1,0 +1,35 @@
+# SYNTAX TEST "Packages/zorgmode/zorgmode.sublime-syntax"
+
+* Some headline
+# <- headline.text.org
+
+Some text
+# <- .text.org
+
+ - list entry
+# <- list_entry.text.org
+
+ * list entry
+# <- list_entry.text.org
+
+ 1. list entry
+# <- list_entry.text.org
+ 
+ a. list entry
+# <- list_entry.text.org
+
+* headline
+# <- headline.text.org
+
+[[some link]]
+# ^^^^^^^^^ reference.link.text.org
+
+- some text [[link]] [[link_address][text]]
+#             ^^^^ reference.link.text.org
+#                      ^^^^^^^^^^^^ reference.link.text.org
+#                                    ^^^^ text.link.text.org
+# ^^ list_entry.text.org
+
+[[broken link]
+* nonbroken headline
+# ^ headline.text.org
