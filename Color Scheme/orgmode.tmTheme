@@ -430,6 +430,17 @@
         </dict>
         <dict>
             <key>name</key>
+            <string>zorgmode link</string>
+            <key>scope</key>
+            <string>link.text.org</string>
+            <key>settings</key>
+            <dict>
+              <key>foreground</key>
+              <string>#FFFFAA</string>
+           </dict>
+        </dict>
+        <dict>
+            <key>name</key>
             <string>orgmode tack</string>
             <key>scope</key>
             <string>orgmode.tack</string>

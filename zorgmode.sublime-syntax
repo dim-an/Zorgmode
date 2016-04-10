@@ -2,7 +2,7 @@
 ---
 file_extensions: [org]
 scope: text.org
-name: zoushmode
+name: zorgmode
 
 contexts:
     main:
