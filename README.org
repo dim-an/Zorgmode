@@ -1,1 +1,18 @@
 Zorgmode is an implementation of org-mode for SublimeText 3
+
+* Feature list:
+  - Recognize orgmode outline: headlines / lists
+    + more lists
+      * even
+        1. more
+          a. lists
+  - Outline manipulation:
+    + Move sections around
+  - Folding
+    + Fold single section
+    + Fold all of the sections
+    + Several visibility states:
+      * overview
+      * contents
+      * show all
+  - [X] Checkboxes
