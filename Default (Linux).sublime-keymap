@@ -80,5 +80,14 @@
                 "operator": "equal",
                 "operand": "text.org"
         }]
+    },
+    {
+        "keys": ["ctrl+alt+t"],
+        "command": "zorgmode_follow_link",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "reference.link.text.org"
+        }]
     }
 ]

@@ -7,13 +7,56 @@ import re
 import sublime_plugin
 import sublime
 
+from . import zorg_parse
+
 MAX_HEADLINE_LEVEL = 30
+
+OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
+
+def goto(view, point):
+    view.sel().clear()
+    view.sel().add(sublime.Region(point))
+    view.show(point)
+
+
+def find_links_in_string(text):
+    processed_end = 0
+    link_list = []
+    while True:
+        start_marker = text.find("[[", processed_end)
+        if start_marker == -1:
+            return link_list
+        end_marker = text.find("]]", start_marker)
+        if end_marker == -1:
+            return link_list
+        separation_marker = text.find("][", start_marker, end_marker)
+        if separation_marker == -1:
+            link_text = None
+            link_reference = text[start_marker + 2:end_marker]
+        else:
+            link_text = text[separation_marker + 2:end_marker]
+            link_reference = text[start_marker + 2:separation_marker]
+        link_list.append(OrgLinkInfo(
+            start=start_marker,
+            end=end_marker + 2,
+            reference=link_reference,
+            text=link_text))
+        processed_end = end_marker + 2
 
 class OrgmodeStructure(object):
     SectionInfo = collections.namedtuple('SectionInfo',
-                                          'headline_region,headline_level,section_region,content_region')
+                                         'headline_region,headline_level,section_region,content_region')
     def __init__(self, view):
         self.view = view
+
+    def get_cursor_point(self):
+        view = self.view
+        if len(view.sel()) != 1:
+            return None
+        sel, = view.sel()
+        if not sel.empty():
+            return None
+        return sel.a
 
     def get_line_region(self, point=None):
         view = self.view
@@ -398,3 +441,42 @@ class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
         view.erase(edit, section_info.section_region)
         sublime.status_message("Entry is archived to `{}'".format(archive_filename))
         return
+
+class ZorgmodeFollowLink(sublime_plugin.TextCommand):
+    def run(self, edit):
+        view = self.view
+
+        # нужно найти ссылку, внутри которой мы находимся
+        orgmode_structure = OrgmodeStructure(view)
+        line_region = orgmode_structure.get_line_region()
+        line = view.substr(line_region)
+        link_list = find_links_in_string(line)
+        cursor_point = orgmode_structure.get_cursor_point()
+        cursor_in_line = cursor_point - line_region.a
+
+        for link_info in link_list:
+            if link_info.start < cursor_in_line < link_info.end:
+                current_link = link_info
+                break
+        else:
+            # TODO: message
+            return
+
+        # нужно понять её тип, убедиться, что она поисковая
+        pass # других типов пока нет, так что не делаем ничего
+
+        # нужно перейти по поисковой ссылке
+        text_to_search = current_link.reference
+
+        org_document = zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
+        offset = None
+        for section in org_document.iter_section():
+            text = section.headline.title.get_text()
+            if text == text_to_search:
+                offset = section.headline.begin
+
+        if offset is None:
+            # TODO: message
+            sublime.status_message("can't follow link, text is not found: `{}'".format(text_to_search))
+            return
+        goto(view, offset)
