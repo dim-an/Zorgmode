@@ -14,10 +14,6 @@
   Сделал синтаксисоспецифичную настройку подсветки [[https://forum.sublimetext.com/t/change-color-scheme-depending-on-file-type-open/2135/5]]
   Живёт в [[/home/ermolovd/.config/sublime-text-3/Packages/User/orgmode.sublime-settings]]
 
-Есть питоноскрипты, которые умеют парсить orgmode:
-  - [[http://members.optusnet.com.au/~charles57/GTD/Orgnode.py]]
-  - [[http://lists.gnu.org/archive/html/emacs-orgmode/2011-04/msg00598.html]]
-  - [[https://github.com/bjonnh/PyOrgMode]]
 
 * DONE Написать тесты на TODO→DONE
 
