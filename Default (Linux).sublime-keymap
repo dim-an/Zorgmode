@@ -1,5 +1,5 @@
 [
-	  /* Orgmode */
+	/* Orgmode */
     {
         "keys": ["alt+shift+right"],
         "command": "zorgmode_cycle_todo_state_forward",
@@ -82,12 +82,21 @@
         }]
     },
     {
-        "keys": ["ctrl+alt+t"],
+        "keys": ["ctrl+alt+enter"],
         "command": "zorgmode_follow_link",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
                 "operand": "reference.link.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+alt+enter"],
+        "command": "zorgmode_follow_link",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "text.link.text.org"
         }]
     }
 ]
