@@ -480,3 +480,6 @@ class ZorgmodeFollowLink(sublime_plugin.TextCommand):
             sublime.status_message("can't follow link, text is not found: `{}'".format(text_to_search))
             return
         goto(view, offset)
+
+    def want_event(self):
+        return True

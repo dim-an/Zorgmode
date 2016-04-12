@@ -3,6 +3,7 @@
 import re
 
 # TODO: вынести регулярки в начало, чтобы компилировались 1 раз
+# TODO: все тэги, ключевые слова и прочее должны быть своими нодами, чтобы у них были begin/end
 
 # formal grammar
 
@@ -106,13 +107,13 @@ class Parser(object):
         return bool(match)
 
     def try_parse_headline(self):
-        # TODO: добавить таги в эту же регулярку
         line = self.get_current_line()
-        match = re.match('^([*]+)\s+'  # STARS
-                         '([A-Za-z0-9]+\s+)?' # KEYWORD
-                         '(?:\[#([a-zA-Z])\])?' # PRIORITY
-                         '(.*)$', # TITLE & TAGS to be parsed later
-                         line)
+        match = re.match('^([*]+) \s+'  # STARS group 1
+                         '(?: ([A-Za-z0-9]+) \s+ )?' # KEYWORD group 2
+                         '(?:\[[#]([a-zA-Z])\]\s+)?' # PRIORITY group 3
+                         '(.*?)' # TITLE -- match in nongreedy fashion group 4
+                         '\s*( : (?: [a-zA-Z0-9_@#]+: )+ )?\s*$', # TAGS group 5
+                         line, re.VERBOSE)
         if not match:
             return None
 
@@ -125,26 +126,24 @@ class Parser(object):
         else:
             keyword = None
 
-        rest_begin = match.start(4)
-        rest_end = match.end(4)
+        title_begin = match.start(4)
+        title_end = match.end(4)
         if match.group(2) is not None and keyword is None:
             # there is some word before priority
             priority = None
-            rest_begin = match.start(2)
+            title_begin = match.start(2)
         elif match.group(3) is None:
             priority = None
         else:
             priority = match.group(3)
 
-        rest = line
-        tag_match = re.match('^.*?' # *? -- match in nongreedy fashion
-                             '(:(?:[a-zA-Z0-9_@#]+:)+)$', rest)
-        if tag_match is not None:
-            tags = tag_match.group(1).strip(':').split(':')
+        tag_group = match.group(5)
+        if tag_group is not None:
+            tags = tag_group.strip(':').split(':')
         else:
             tags = []
 
-        self._push_context_substr(rest_begin, rest_end)
+        self._push_context_substr(title_begin, title_end)
         title_node = self.parse_text_node()
         self._pop_context()
 
@@ -255,6 +254,10 @@ if __name__ == '__main__':
             self.assertEqual(headline.title.get_text(), "some text")
 
             p = Parser('*** TODO [#a] some text')
+            headline = p.try_parse_headline()
+            self.assertEqual(headline.title.get_text(), "some text")
+
+            p = Parser('*** TODO [#a] some text :tag1:tag2:')
             headline = p.try_parse_headline()
             self.assertEqual(headline.title.get_text(), "some text")
 

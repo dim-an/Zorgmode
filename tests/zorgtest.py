@@ -19,3 +19,6 @@ class ZorgTestCase(TestCase):
             raise ValueError
         r, c = self.view.rowcol(self.view.sel()[0].a)
         return r + 1, c + 1
+
+    def setText(self, string):
+        self.view.run_command("append", {"characters": string})
