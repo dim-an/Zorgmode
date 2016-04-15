@@ -33,3 +33,6 @@ Some text
 [[broken link]
 * nonbroken headline
 # ^ headline.text.org
+
+#+ARCHIVE: foobar
+# <- special_line.text.org

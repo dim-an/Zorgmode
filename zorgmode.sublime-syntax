@@ -9,6 +9,7 @@ contexts:
         - include: expect_headline
         - include: expect_list_entry
         - include: expect_link
+        - include: expect_special_line
 
     expect_list_entry:
         - match: '^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+'
@@ -29,8 +30,6 @@ contexts:
         - include: expect_link
         - match: '(\n)?$'
           pop: true 
-
-
 
     expect_link:
         - match: '\[\['
@@ -53,3 +52,7 @@ contexts:
         - match: '$'
           scope: broken.link.text.org
           pop: true
+
+    expect_special_line:
+        - match: '^#\+[A-Z_]+:.*$'
+          scope: special_line.text.org

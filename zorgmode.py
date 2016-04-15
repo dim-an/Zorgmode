@@ -18,6 +18,8 @@ def goto(view, point):
     view.sel().add(sublime.Region(point))
     view.show(point)
 
+def zorg_parse_document(view):
+    return zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
 
 def find_links_in_string(text):
     processed_end = 0
@@ -409,10 +411,13 @@ class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
         if current_filename is None:
             sublime.status_message("File doesn't have a name don't know where to put archive")
             return
-        if current_filename.endswith('.org'):
-            archive_filename = current_filename + '_archive'
-        else:
-            archive_filename = current_filename + '.org_archive'
+        document = zorg_parse_document(view)
+        archive_template = document.archive
+        if archive_template is None:
+            archive_template = '%s_archive'
+        archive_filename = archive_template.replace('%s', current_filename)
+
+        # TODO: use parsed structure
 
         # Найти текущую секцию
         orgmode_structure = OrgmodeStructure(view)

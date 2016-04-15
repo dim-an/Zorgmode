@@ -452,6 +452,17 @@
         </dict>
         <dict>
             <key>name</key>
+            <string>zorgmode special line</string>
+            <key>scope</key>
+            <string>special_line.text.org</string>
+            <key>settings</key>
+            <dict>
+              <key>foreground</key>
+              <string>#6E6E6E</string>
+           </dict>
+        </dict>
+        <dict>
+            <key>name</key>
             <string>orgmode tack</string>
             <key>scope</key>
             <string>orgmode.tack</string>

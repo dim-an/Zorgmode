@@ -85,15 +85,33 @@ class Parser(object):
             section_stack[-1].inner_section = inner_section
         return self._document
 
+    def parse_special_line(self):
+        """
+        parse "special lines" like #+TITLE: etc
+        that set properties for the whole document
+        """
+        line = self.get_current_line()
+        match = re.match('^#\+([A-Z_]+):(.*)', line)
+        if match is None:
+            return None
+        key = match.group(1)
+        value = match.group(2)
+
+        return SpecialLine(
+            self._document,
+            self.get_current_line_begin(),
+            self.get_current_line_end(),
+            key, value)
+
+
     def consume_inner_section(self):
-        result = None
+        inner_section_begin = self.get_current_line_begin()
         while not self._is_exhausted() and not self.is_header():
-            if result is None:
-                result = TextNode(self._document, self.get_current_line_begin(), self.get_current_line_end(), [])
-            else:
-                result.merge(self.get_current_line_begin(), self.get_current_line_end(), [])
+            special_line = self.parse_special_line()
+            if special_line is not None:
+                self._document.add_special_line(special_line)
             self._next_line()
-        return result
+        return TextNode(self._document, inner_section_begin, self.get_current_line_end())
 
     def consume_headline(self):
         result = self.try_parse_headline()
@@ -171,15 +189,18 @@ class OrgNode(object):
         return self.document.text[self.begin:self.end]
 
 class TextNode(OrgNode):
-    def __init__(self, document, begin, end, links):
+    def __init__(self, document, begin, end, links=None):
         super(TextNode, self).__init__(document, begin, end)
+        if links is None:
+            links = []
         self.links = links
 
-    def merge(self, begin, end, links):
-        if begin != self.end:
-            raise ValueError("sections should be consequtive; old end: {} new begin: {}".format(self.end, begin))
-        self.end = end
-        self.links += links
+class SpecialLine(OrgNode):
+    def __init__(self, document, begin, end, key, value):
+        super(SpecialLine, self).__init__(document, begin, end)
+        self.key = key
+        self.value = value
+
 
 class OrgDocument(object):
     def __init__(self, text):
@@ -187,12 +208,23 @@ class OrgDocument(object):
         self.level = 0
         self.inner_section = None
         self.text = text
+        self.special_line_list = []
         self.subsection_list = []
+        self.archive = None
 
     def add_subsection_from_headline(self, headline):
         subsection = OrgSection.from_headline(self, headline)
         self.subsection_list.append(subsection)
         return subsection
+
+    def add_special_line(self, special_line):
+        if not isinstance(special_line, SpecialLine):
+            raise ValueError("should be called with SpecialLine instance, not {}".format(special_line.__class__))
+
+        if special_line.key == "ARCHIVE":
+            self.archive = special_line.value
+
+        self.special_line_list.append(special_line)
 
     def iter_section(self):
         return _iter_subsection(self)
@@ -278,6 +310,8 @@ if __name__ == '__main__':
                 subsection_list=' '.join(print_structure(n) for n in node.subsection_list))
         elif isinstance(node, TextNode):
             return "(TextNode)"
+        elif isinstance(node, SpecialLine):
+            return "(SpecialLine {} {})".format(node.key, node.value)
         else:
             raise ValueError("Unknown node type: {}".format(node.__class__))
 
@@ -318,4 +352,12 @@ if __name__ == '__main__':
                 subsections,
                 ["Header 1", "Header 2", "Header 3", "Header 4", "Header 5"])
 
+    class TestSpecialLineParsing(unittest.TestCase):
+        def test_simple(self):
+            document = parse_org_string('* Header 1\n'
+                                        '#+ARCHIVE:foo\n')
+            self.assertEqual(document.archive, 'foo')
+
+if __name__ == '__main__':
+    import unittest
     unittest.main()
