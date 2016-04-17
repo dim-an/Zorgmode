@@ -405,17 +405,21 @@ class ZorgmodeToggleCheckbox(sublime_plugin.TextCommand):
         view.replace(edit, tick_region, next_tick)
 
 class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit, silent=True):
         view = self.view
         current_filename = view.file_name()
-        if current_filename is None:
-            sublime.status_message("File doesn't have a name don't know where to put archive")
-            return
         document = zorg_parse_document(view)
         archive_template = document.archive
         if archive_template is None:
             archive_template = '%s_archive'
-        archive_filename = archive_template.replace('%s', current_filename)
+
+        if '%s' in archive_template:
+            if current_filename is None:
+                sublime.status_message("File doesn't have a name don't know where to put archive")
+                return
+            archive_filename = archive_template.replace('%s', current_filename)
+        else:
+            archive_filename = archive_template
 
         # TODO: use parsed structure
 
@@ -440,7 +444,8 @@ class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
                 outf.write(level1_section_text)
         except IOError as e:
             # Если не ок, жалуемся
-            sublime.error_message("can not use `{}' as archive file: {}".format(archive_filename, e))
+            if not silent:
+                sublime.error_message("can not use `{}' as archive file: {}".format(archive_filename, e))
             return
         # Если ok, удаляем секцию
         view.erase(edit, section_info.section_region)
