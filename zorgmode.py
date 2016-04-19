@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import webbrowser
 import collections
 import itertools
 import re
@@ -469,27 +470,29 @@ class ZorgmodeFollowLink(sublime_plugin.TextCommand):
                 current_link = link_info
                 break
         else:
+            sublime.status_message("cursor is not on the link")
             # TODO: message
             return
 
-        # нужно понять её тип, убедиться, что она поисковая
-        pass # других типов пока нет, так что не делаем ничего
+        if current_link.reference.startswith('http:') or current_link.reference.startswith('https:'):
+            webbrowser.open_new(current_link.reference)
+        else:
+            self.follow_header_link(view, current_link.reference)
 
-        # нужно перейти по поисковой ссылке
-        text_to_search = current_link.reference
+    def open_in_browser(self, url):
+        webbrowser.open_new(url)
 
+    def follow_header_link(self, view, caption):
         org_document = zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
         offset = None
         for section in org_document.iter_section():
             text = section.headline.title.get_text()
-            if text == text_to_search:
+            if text == caption:
                 offset = section.headline.begin
 
         if offset is None:
             # TODO: message
-            sublime.status_message("can't follow link, text is not found: `{}'".format(text_to_search))
+            sublime.status_message("can't follow link, text is not found: `{}'".format(caption))
             return
         goto(view, offset)
 
-    def want_event(self):
-        return True
