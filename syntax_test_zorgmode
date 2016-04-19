@@ -1,38 +1,52 @@
 # SYNTAX TEST "Packages/zorgmode/zorgmode.sublime-syntax"
 
 * Some headline
-# <- headline.text.org
+# <- org.text.headline.1
+** Some headline level 2
+# <- org.text.headline.2
+*** Some headline level 3
+# <- org.text.headline.3
+**** Some headline level 4
+# <- org.text.headline.4
+***** Some headline level 5
+# <- org.text.headline.5p
+****** Some headline level 6
+# <- org.text.headline.5p
+
+*this is not headline
+# <- org.text
+
 
 Some text
-# <- .text.org
+# <- org.text
 
  - list entry
-# <- list_entry.text.org
+# <- org.text.list.entry
 
  * list entry
-# <- list_entry.text.org
+# <- org.text.list.entry
 
  1. list entry
-# <- list_entry.text.org
+# <- org.text.list.entry
  
  a. list entry
-# <- list_entry.text.org
+# <- org.text.list.entry
 
-* headline
-# <- headline.text.org
+ * headline
+# <- org.text.list.entry
 
 [[some link]]
-# ^^^^^^^^^ reference.link.text.org
+# ^^^^^^^^^ org.text.link.reference
 
 - some text [[link]] [[link_address][text]]
-#             ^^^^ reference.link.text.org
-#                      ^^^^^^^^^^^^ reference.link.text.org
-#                                    ^^^^ text.link.text.org
-# ^^ list_entry.text.org
+#             ^^^^ org.text.link.reference
+#                      ^^^^^^^^^^^^ org.text.link.reference
+#                                    ^^^^ org.text.link.text
+# ^^ org.text.list.entry
 
 [[broken link]
 * nonbroken headline
-# ^ headline.text.org
+# ^ org.text.headline.1
 
 #+ARCHIVE: foobar
-# <- special_line.text.org
+# <- org.text.special_line

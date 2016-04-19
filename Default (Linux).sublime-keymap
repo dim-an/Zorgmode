@@ -6,7 +6,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "headline.text.org"
+                "operand": "org.text.headline"
         }]
     },
     {
@@ -14,8 +14,8 @@
         "command": "zorgmode_cycle_todo_state_backward",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "headline.text.org"
+                // "operator": "regex_match",
+                "operand": "org.text.headline"
         }]
     },
     {
@@ -24,7 +24,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "headline.text.org"
+                "operand": "org.text.headline"
         }]
     },
     {
@@ -33,7 +33,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "text.org"
+                "operand": "org.text"
         }]
     },
     {
@@ -42,7 +42,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "headline.text.org"
+                "operand": "org.text.headline"
         }]
     },
     {
@@ -51,7 +51,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "headline.text.org"
+                "operand": "org.text.headline"
         }]
     },
     {
@@ -60,7 +60,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "list_entry.text.org"
+                "operand": "org.text.list.entry"
         }]
     },
     {
@@ -69,7 +69,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "list_entry.text.org"
+                "operand": "org.text.list.entry"
         }]
     },
     {
@@ -78,7 +78,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "text.org"
+                "operand": "org.text"
         }]
     },
     {
@@ -87,16 +87,7 @@
         "context": [{
                 "key": "selector",
                 "operator": "equal",
-                "operand": "reference.link.text.org"
-        }]
-    },
-    {
-        "keys": ["ctrl+alt+enter"],
-        "command": "zorgmode_follow_link",
-        "context": [{
-                "key": "selector",
-                "operator": "equal",
-                "operand": "text.link.text.org"
+                "operand": "org.text.link"
         }]
     }
 ]

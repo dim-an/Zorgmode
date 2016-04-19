@@ -1,7 +1,7 @@
 %YAML 1.2
 ---
 file_extensions: [org]
-scope: text.org
+scope: org.text
 name: zorgmode
 
 contexts:
@@ -16,43 +16,76 @@ contexts:
           push: list_entry
     
     list_entry:
-        - meta_scope: list_entry.text.org
+        - meta_scope: org.text.list.entry
         - include: expect_link
         - match: '(\n)?$'
           pop: true
 
     expect_headline:
-        - match: '^[*]'
-          push: headline
+        - match: '^[*]{1}\s'
+          push: headline1
+        - match: '^[*]{2}\s'
+          push: headline2
+        - match: '^[*]{3}\s'
+          push: headline3
+        - match: '^[*]{4}\s'
+          push: headline4
+        - match: '^[*]{5}[*]*\s'
+          push: headline5p
 
-    headline:
-        - meta_scope: headline.text.org
+
+    headline1:
+        - meta_scope: org.text.headline.1
         - include: expect_link
         - match: '(\n)?$'
           pop: true 
+
+    headline2:
+        - meta_scope: org.text.headline.2
+        - include: expect_link
+        - match: '(\n)?$'
+          pop: true 
+
+    headline3:
+        - meta_scope: org.text.headline.3
+        - include: expect_link
+        - match: '(\n)?$'
+          pop: true 
+
+    headline4:
+        - meta_scope: org.text.headline.4
+        - include: expect_link
+        - match: '(\n)?$'
+          pop: true
+
+    headline5p:
+        - meta_scope: org.text.headline.5p
+        - include: expect_link
+        - match: '(\n)?$'
+          pop: true
 
     expect_link:
         - match: '\[\['
           push: link
 
     link:
-        - meta_scope: reference.link.text.org
+        - meta_scope: org.text.link.reference
         - match: '\]\]'
           pop: true
         - match: '\]\['
           set: link_text
         - match: '$'
-          scope: broken.link.text.org
+          scope: org.text.link.broken
           pop: true
     
     link_text:
-        - meta_scope: text.link.text.org
+        - meta_scope: org.text.link.text
         - match: '\]\]'
           pop: true
         - match: '$'
-          scope: broken.link.text.org
+          scope: org.text.link.broken
           pop: true
 
     expect_special_line:
         - match: '^#\+[A-Z_]+:.*$'
-          scope: special_line.text.org
+          scope: org.text.special_line
