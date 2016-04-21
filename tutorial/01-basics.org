@@ -1,0 +1,33 @@
+Hey! Welcome to SublimeText3 Zorgmode a plugin that helps you work with org-files.
+
+** TODO должен быть пункт меню
+Don't worry to spoil this file. You can always find a fresh copy under *Menu ->...*
+
+* What is an orgfile
+Orgfile is a plain text file. It has hierarchical structure and can be used for taking notes / maintaining todo lists / organizing personal wiki etc.
+
+* Document structure
+Each document consists of sections. Section begins with a headline line that starts with one or more stars `*` followed by white space ` `. Examples are below:
+
+** This is second level headline
+Some text in second level section
+*** And this is third level headline
+More text
+** This is second level headline again
+
+** Outline
+You can toggle view of your document using (Ctrl+Alt+\). It will switch between:
+ - overview mode :: shows only top level headlines
+ - contents mode :: shows all headlines
+ - show-all mode :: shows all content
+
+You can switch view of single section by using (Ctrl+\).
+
+Try it now.
+
+** Navigation
+
+* Links
+You can follow link with `Ctrl+Alt+Enter'
+  - [[http://orgmode.org/manual/Document-structure.html#Document-structure][web site about original org mode for emacs]]
+  - [ ] [[][Next: TODOs]]
