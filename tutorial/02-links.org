@@ -1,0 +1,10 @@
+* How to insert link in your document
+Links in orgmode looks like this [[http://github.com/]] or like this [[http://github.com/][Github home page]]
+In order to follow link you can use (Ctrl+Alt+Enter).
+
+** Types of link
+Все виды ссылок поддерживают оба вида ссылок
+  - [[http://github.com/]] :: open page in a browser
+  - [[Types of link]] :: move cursor to headline 
+  - [[file:path/on/your/computer]] :: link to file on your computer (will open in SublimeText3)
+  - [[file+sys:path/on/you/computer]] :: link to file on your computer (will open as with double-click)
