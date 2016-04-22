@@ -3,7 +3,9 @@
 import webbrowser
 import collections
 import itertools
+import os
 import re
+import subprocess
 
 import sublime_plugin
 import sublime
@@ -474,13 +476,33 @@ class ZorgmodeFollowLink(sublime_plugin.TextCommand):
             # TODO: message
             return
 
-        if current_link.reference.startswith('http:') or current_link.reference.startswith('https:'):
-            webbrowser.open_new(current_link.reference)
-        else:
-            self.follow_header_link(view, current_link.reference)
+        ref_handlers = [
+            ('http:', self.open_in_browser),
+            ('https:', self.open_in_browser),
+            ('file:', self.open_file),
+            ('file+sys:', self.open_sys_file),
+            ('', self.follow_header_link),
+        ]
 
-    def open_in_browser(self, url):
+        for prefix, handler in ref_handlers:
+            if current_link.reference.startswith(prefix):
+                handler(view, current_link.reference)
+
+    def open_in_browser(self, view, url):
         webbrowser.open_new(url)
+
+    def open_file(self, view, url):
+        file_path = url.split(':', 1)[-1] # strip scheme
+        file_path = os.path.expanduser(file_path)
+        window = view.window()
+        window.open_file(file_path)
+
+    def open_sys_file(self, view, url):
+        file_path = url.split(':', 1)[-1] # strip scheme
+        file_path = os.path.expanduser(file_path)
+        # TODO: нужно сделать для других типов файлов
+        subprocess.check_call(['xdg-open', file_path])
+        
 
     def follow_header_link(self, view, caption):
         org_document = zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
