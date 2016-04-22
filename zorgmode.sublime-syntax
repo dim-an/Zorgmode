@@ -74,7 +74,7 @@ contexts:
           pop: true
         - match: '\]\['
           set: link_text
-        - match: '$'
+        - match: '[^\]]*(\]?)$'
           scope: org.text.link.broken
           pop: true
     
@@ -82,7 +82,7 @@ contexts:
         - meta_scope: org.text.link.text
         - match: '\]\]'
           pop: true
-        - match: '$'
+        - match: '[^\]]*(\]?)$'
           scope: org.text.link.broken
           pop: true
 
