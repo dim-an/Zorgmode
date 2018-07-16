@@ -18,8 +18,7 @@ Zorgmode is an implementation of org-mode for SublimeText 3
   - [X] Checkboxes
 
 
-INSTALL
-=======
+* INSTALL
 
 Copy directory into 
 $SUBLIME_SETTINGS_DIRECTORY/Packages
