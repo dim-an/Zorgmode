@@ -1,3 +1,10 @@
+* TODO Реализовать visibility cycling для одного tab'а
+Сейчас 2 режима всё свёрнуто, всё развёрнуто, нужен третий режим: overview
+
+* TODO Реализовать alt+enter
+[[https://orgmode.org/manual/Structure-editing.html#Structure-editing]]
+
+* TODO ctrl+z не работает для помечания чекбоксов
 
 * TODO Разделение пустыми строками случаи
   - если пустая строка разделяет секции одного уровня, она так и должна там остаться.

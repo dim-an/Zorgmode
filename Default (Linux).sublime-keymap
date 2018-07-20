@@ -64,13 +64,21 @@
         }]
     },
     {
-        "keys": ["alt+shift+left"],
+        "keys": ["ctrl+c", "ctrl+c"],
         "command": "zorgmode_toggle_checkbox",
-        "context": [{
+        "context": [
+            {
                 "key": "selector",
                 "operator": "equal",
                 "operand": "org.text.list.entry"
-        }]
+            },
+            {
+                "key": "selection_empty",
+                "operator": "equal",
+                "operand": true,
+                "match_all": true
+            }
+        ]
     },
     {
         "keys": ["ctrl+shift+a"],
@@ -84,10 +92,22 @@
     {
         "keys": ["enter"],
         "command": "zorgmode_follow_link",
-        "context": [{
+        "context": [
+            {
                 "key": "selector",
                 "operator": "equal",
                 "operand": "org.text.link"
-        }]
+            },
+            {
+                "key": "preceding_text",
+                "operator": "not_regex_contains",
+                "operand": "]]$"
+            },
+            {
+                "key": "following_text",
+                "operator": "not_regex_contains",
+                "operand": "^\\[\\["
+            },
+        ]
     }
 ]
