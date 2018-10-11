@@ -1,21 +1,35 @@
-Zorgmode is an implementation of org-mode for SublimeText 3
+Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeText 3.
 
-* Feature list:
-  - Recognize orgmode outline: headlines / lists
-    + more lists
-      * even
-        1. more
-          a. lists
-  - Outline manipulation:
-    + Move sections around
-  - Folding
-    + Fold single section
-    + Fold all of the sections
-    + Several visibility states:
-      * overview
-      * contents
-      * show all
-  - [X] Checkboxes
+* Introduction
+This plugin is inspired by [[https://orgmode.org/][org mode]] for emacs. Org is a mode for keeping notes, maintaining TODO lists, and project planning with a fast and effective plain-text system. 
+
+* Features
+Currently zorgmode doesn't provide all the features of [[emacs' org mode][https://orgmode.org/]] but it's quite usable.
+
+List of supported features:
+  - syntax highlightning
+  - cycle of visibility of heading 
+  - hyperlinks within org files and outside (web pages, files)
+  - structural editing (move sections)
+  - bullet lists
+
+* Short command overview
+
+|              Command               |   Keys (Linux)  |       Context        |                    Comment                    |
+|====================================|=================|======================|===============================================|
+| zorgmode_cycle                     | tab             | headline             | cycles through visibility of the current tree |
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
+| zorgmode_cycle_all                 | shift+tab       | any                  | cycles through visibility of all trees        |
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
+| zorgmode_move_node_up              | alt+up          | headline / list item | moves current section / list item up / down   |
+| zorgmode_move_node_down            | alt+down        | headline / list item |                                               |
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
+| zorgmode_cycle_todo_state_forward  | alt+shift+right | todo headline        |                                               |
+| zorgmode_cycle_todo_state_backward | alt+shift+left  | todo headline        |                                               |
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
+| zorgmode_toggle_checkbox           |                 | checkbox list item   |                                               |
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
+| zorgmode_follow_link               |                 | link                 | follow link                                   |
 
 
 * INSTALL
