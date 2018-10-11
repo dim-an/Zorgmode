@@ -49,5 +49,16 @@ class TestFollowTextLink(ZorgTestCase):
         row, column = self.getCursorPos()
         self.assertEqual(row, 3)
         self.assertEqual(column, 1)
-        
 
+    def test_follow_link_jump_back(self):
+        self.setText(
+            "* Header 1\n"
+            "some text [[Header 1]]\n")
+        #    ^0   ^5   ^10
+
+        self.setCursorPos(2, 12)
+        self.view.run_command("zorgmode_follow_link")
+        self.assertEqual(self.getCursorPos(), (1, 1))
+
+        self.view.run_command("jump_back")
+        self.assertEqual(self.getCursorPos(), (2, 12))

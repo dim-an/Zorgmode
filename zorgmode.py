@@ -12,11 +12,25 @@ import sublime
 
 from . import zorg_parse
 
+try:
+    import Default.history_list as history_list_plugin
+except ImportError:
+    history_list_plugin = None
+
 MAX_HEADLINE_LEVEL = 30
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
+if history_list_plugin:
+    def save_position_for_jump_history(view):
+        jump_history = Default.history_list.get_jump_history_for_view(view)
+        jump_history.push_selection(view)
+else:
+    def save_position_for_jump_history(view):
+        pass
+
 def goto(view, point):
+    save_position_for_jump_history(view)
     view.sel().clear()
     view.sel().add(sublime.Region(point))
     view.show(point)
@@ -513,8 +527,6 @@ class ZorgmodeFollowLink(sublime_plugin.TextCommand):
                 offset = section.headline.begin
 
         if offset is None:
-            # TODO: message
             sublime.status_message("can't follow link, text is not found: `{}'".format(caption))
             return
         goto(view, offset)
-
