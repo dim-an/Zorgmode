@@ -23,7 +23,7 @@ OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
 if history_list_plugin:
     def save_position_for_jump_history(view):
-        jump_history = Default.history_list.get_jump_history_for_view(view)
+        jump_history = history_list_plugin.get_jump_history_for_view(view)
         jump_history.push_selection(view)
 else:
     def save_position_for_jump_history(view):
