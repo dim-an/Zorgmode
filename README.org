@@ -1,35 +1,43 @@
 Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeText 3.
 
 * Introduction
-This plugin is inspired by [[https://orgmode.org/][org mode]] for emacs. Org is a mode for keeping notes, maintaining TODO lists, and project planning with a fast and effective plain-text system. 
+This plugin is inspired by [[https://orgmode.org/][org mode]] for emacs.
 
 * Features
-Currently zorgmode doesn't provide all the features of [[emacs' org mode][https://orgmode.org/]] but it's quite usable.
+Currently zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
 
 List of supported features:
   - syntax highlightning
-  - cycle of visibility of heading 
+  - cycle of visibility of sections
   - hyperlinks within org files and outside (web pages, files)
   - structural editing (move sections)
-  - bullet lists
+  - lists and lists with checkboxes
 
 * Short command overview
 
-|              Command               |   Keys (Linux)  |       Context        |                    Comment                    |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_cycle                     | tab             | headline             | cycles through visibility of the current tree |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_cycle_all                 | shift+tab       | any                  | cycles through visibility of all trees        |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_move_node_up              | alt+up          | headline / list item | moves current section / list item up / down   |
-| zorgmode_move_node_down            | alt+down        | headline / list item |                                               |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_cycle_todo_state_forward  | alt+shift+right | todo headline        |                                               |
-| zorgmode_cycle_todo_state_backward | alt+shift+left  | todo headline        |                                               |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_toggle_checkbox           |                 | checkbox list item   |                                               |
-|------------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorgmode_follow_link               |                 | link                 | follow link                                   |
+|              Command               |     Keys (Linux)    |       Context        |                      Comment                      |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_cycle                         | tab                 | headline             | cycles through visibility of the current tree     |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_cycle_all                     | shift+tab           | any                  | cycles through visibility of all trees            |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_move_node_up                  | alt+up              | headline / list item | moves current section (or list item) up (or down) |
+| ---------------------------------- | ------------------- |                      |                                                   |
+| zorg_move_node_down                | alt+down            |                      |                                                   |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_cycle_todo_state_forward      | alt+shift+right     | todo headline        | Cycles headline between states:                   |
+|                                    |                     |                      | - TODO                                            |
+| --------------------------------   | -----------------   |                      | - DONE                                            |
+| zorg_cycle_todo_state_backward     | alt+shift+left      |                      | - <empty state>                                   |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_toggle_checkbox               | alt+shift+left      | checkbox list item   | toggles checkbox between                          |
+|                                    |                     |                      | unchecked ([ ]) and checked([X]) states           |
+|------------------------------------|---------------------|----------------------|---------------------------------------------------|
+| zorg_follow_link                   | enter               | link                 | follow link                                       |
+
+
+* Org document
+Org document is a plain text file.
 
 
 * INSTALL
