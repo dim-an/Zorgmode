@@ -14,7 +14,6 @@
         "command": "zorg_cycle_todo_state_backward",
         "context": [{
                 "key": "selector",
-                // "operator": "regex_match",
                 "operand": "org.text.headline"
         }]
     },

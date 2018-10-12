@@ -487,7 +487,6 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
                 break
         else:
             sublime.status_message("cursor is not on the link")
-            # TODO: message
             return
 
         ref_handlers = [
