@@ -16,7 +16,7 @@ List of supported features:
 * Short command overview
 
 |              Command               |   Keys (Linux)  |       Context        |                    Comment                    |
-|====================================|=================|======================|===============================================|
+|------------------------------------|-----------------|----------------------|-----------------------------------------------|
 | zorgmode_cycle                     | tab             | headline             | cycles through visibility of the current tree |
 |------------------------------------|-----------------|----------------------|-----------------------------------------------|
 | zorgmode_cycle_all                 | shift+tab       | any                  | cycles through visibility of all trees        |

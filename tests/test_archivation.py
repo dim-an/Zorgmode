@@ -14,7 +14,7 @@ class TestArchivation(ZorgTestCase):
                 "** Header 2\n"
                 "* Header 3\n").format(tempfile=tmpf.name))
             self.setCursorPos(2, 2)
-            self.view.run_command("zorgmode_move_to_archive")
+            self.view.run_command("zorg_move_to_archive")
 
             self.assertEqual(
                 self.getAllText(),
@@ -35,7 +35,7 @@ class TestArchivation(ZorgTestCase):
                 "** Header 2\n"
                 "* Header 3\n").format(tempfile=tmpf.name))
             self.setCursorPos(3, 2)
-            self.view.run_command("zorgmode_move_to_archive")
+            self.view.run_command("zorg_move_to_archive")
 
             self.assertEqual(
                 self.getAllText(),
@@ -53,7 +53,7 @@ class TestArchivation(ZorgTestCase):
             "** Header 2\n"
             "* Header 3\n")
         self.setCursorPos(3, 2)
-        self.view.run_command("zorgmode_move_to_archive", {"silent": True})
+        self.view.run_command("zorg_move_to_archive", {"silent": True})
         self.assertEqual(
             self.getAllText(),
             ("#+ARCHIVE:/dev/null/inexistent_file\n"

@@ -153,11 +153,11 @@ def cycle_todo_state(view, edit, forward=True):
         next_status += ' '
     view.replace(edit, status_region, next_status)
 
-class ZorgmodeCycleTodoStateForward(sublime_plugin.TextCommand):
+class ZorgCycleTodoStateForward(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=True)
 
-class ZorgmodeCycleTodoStateBackward(sublime_plugin.TextCommand):
+class ZorgCycleTodoStateBackward(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=False)
 
@@ -180,7 +180,7 @@ def find_all_in_region(view, expr, region, *flags):
         pos = match_region.b
     return result
 
-class ZorgmodeCycle(sublime_plugin.TextCommand):
+class ZorgCycle(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         if len(view.sel()) != 1:
@@ -353,7 +353,7 @@ def move_current_node(view, edit, up=True):
     view.show(view.sel()[0].a)
 
 
-class ZorgmodeCycleAll(sublime_plugin.TextCommand):
+class ZorgCycleAll(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         if len(view.sel()) != 1:
@@ -390,17 +390,17 @@ class ZorgmodeCycleAll(sublime_plugin.TextCommand):
             view.fold(top_headers_folding)
 
 
-class ZorgmodeMoveNodeUp(sublime_plugin.TextCommand):
+class ZorgMoveNodeUp(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=True)
 
 
-class ZorgmodeMoveNodeDown(sublime_plugin.TextCommand):
+class ZorgMoveNodeDown(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=False)
 
 
-class ZorgmodeToggleCheckbox(sublime_plugin.TextCommand):
+class ZorgToggleCheckbox(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         orgmode_structure = OrgmodeStructure(view)
@@ -421,7 +421,7 @@ class ZorgmodeToggleCheckbox(sublime_plugin.TextCommand):
         next_tick = {' ': 'X', 'X': ' '}.get(tick_mark, ' ')
         view.replace(edit, tick_region, next_tick)
 
-class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
+class ZorgMoveToArchive(sublime_plugin.TextCommand):
     def run(self, edit, silent=True):
         view = self.view
         current_filename = view.file_name()
@@ -469,7 +469,7 @@ class ZorgmodeMoveToArchive(sublime_plugin.TextCommand):
         sublime.status_message("Entry is archived to `{}'".format(archive_filename))
         return
 
-class ZorgmodeFollowLink(sublime_plugin.TextCommand):
+class ZorgFollowLink(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
 

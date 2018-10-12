@@ -26,21 +26,21 @@ class TestCycleTodoState(TestCase):
             " some description\n"
             "* TODO Caption2\n")
         self.view.run_command('goto_line', {'line': 1})
-        self.view.run_command('zorgmode_cycle_todo_state_forward')
+        self.view.run_command('zorg_cycle_todo_state_forward')
         self.assertEqual(
             self.getAllText(),
             "* TODO Caption1\n"
             " some description\n"
             "* TODO Caption2\n")
 
-        self.view.run_command('zorgmode_cycle_todo_state_forward')
+        self.view.run_command('zorg_cycle_todo_state_forward')
         self.assertEqual(
             self.getAllText(),
             "* DONE Caption1\n"
             " some description\n"
             "* TODO Caption2\n")
 
-        self.view.run_command('zorgmode_cycle_todo_state_forward')
+        self.view.run_command('zorg_cycle_todo_state_forward')
         self.assertEqual(
             self.getAllText(),
             "* Caption1\n"
@@ -48,7 +48,7 @@ class TestCycleTodoState(TestCase):
             "* TODO Caption2\n")
 
         self.view.run_command('goto_line', {'line': 2})
-        self.view.run_command('zorgmode_cycle_todo_state_forward')
+        self.view.run_command('zorg_cycle_todo_state_forward')
         self.assertEqual(
             self.getAllText(),
             "* Caption1\n"
@@ -56,7 +56,7 @@ class TestCycleTodoState(TestCase):
             "* TODO Caption2\n")
 
         self.view.run_command('goto_line', {'line': 3})
-        self.view.run_command('zorgmode_cycle_todo_state_forward')
+        self.view.run_command('zorg_cycle_todo_state_forward')
         self.assertEqual(
             self.getAllText(),
             "* Caption1\n"
@@ -69,21 +69,21 @@ class TestCycleTodoState(TestCase):
             " some description\n"
             "* TODO Caption2\n")
         self.view.run_command('goto_line', {'line': 1})
-        self.view.run_command('zorgmode_cycle_todo_state_backward')
+        self.view.run_command('zorg_cycle_todo_state_backward')
         self.assertEqual(
             self.getAllText(),
             "* DONE Caption1\n"
             " some description\n"
             "* TODO Caption2\n")
 
-        self.view.run_command('zorgmode_cycle_todo_state_backward')
+        self.view.run_command('zorg_cycle_todo_state_backward')
         self.assertEqual(
             self.getAllText(),
             "* TODO Caption1\n"
             " some description\n"
             "* TODO Caption2\n")
 
-        self.view.run_command('zorgmode_cycle_todo_state_backward')
+        self.view.run_command('zorg_cycle_todo_state_backward')
         self.assertEqual(
             self.getAllText(),
             "* Caption1\n"

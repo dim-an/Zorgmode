@@ -28,7 +28,7 @@ class TestMoveNode(ZorgTestCase):
             "*** Other caption\n"
             "** Caption2\n")
         self.setCursorPos(1, 2)
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "some stuff\n"
@@ -39,7 +39,7 @@ class TestMoveNode(ZorgTestCase):
         self.assertEqual(self.getCursorPos(), (1, 2))
 
         self.setCursorPos(2, 3)
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "some stuff\n"
@@ -50,7 +50,7 @@ class TestMoveNode(ZorgTestCase):
         self.assertEqual(self.getCursorPos(), (3, 3))
 
         self.setCursorPos(2, 3)
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "some stuff\n"
@@ -60,7 +60,7 @@ class TestMoveNode(ZorgTestCase):
             "** Caption2\n")
         self.assertEqual(self.getCursorPos(), (5, 3))
 
-        self.view.run_command('zorgmode_move_node_up')
+        self.view.run_command('zorg_move_node_up')
         self.assertEqual(
             self.getAllText(),
             "some stuff\n"
@@ -78,7 +78,7 @@ class TestMoveNode(ZorgTestCase):
             "** Caption2\n")
 
         self.setCursorPos(1, 5)
-        self.view.run_command('zorgmode_move_node_up')
+        self.view.run_command('zorg_move_node_up')
         self.assertEqual(
             self.getAllText(),
             "** Caption\n"
@@ -88,7 +88,7 @@ class TestMoveNode(ZorgTestCase):
         self.assertEqual(self.getCursorPos(), (1, 5))
 
         self.setCursorPos(4, 2)
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "** Caption\n"
@@ -108,7 +108,7 @@ class TestMoveNode(ZorgTestCase):
             "*** Other caption 3\n")
 
         self.setCursorPos(3, 5)
-        self.view.run_command('zorgmode_move_node_up')
+        self.view.run_command('zorg_move_node_up')
         self.assertEqual(
             self.getAllText(),
             "** Caption\n"
@@ -120,7 +120,7 @@ class TestMoveNode(ZorgTestCase):
             "*** Other caption 3\n")
         self.assertEqual(self.getCursorPos(), (3, 5))
 
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "** Caption\n"
@@ -132,7 +132,7 @@ class TestMoveNode(ZorgTestCase):
             "*** Other caption 3\n")
         self.assertEqual(self.getCursorPos(), (4, 5))
 
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "** Caption\n"
@@ -150,7 +150,7 @@ class TestMoveNode(ZorgTestCase):
             "** Caption2\n"
             "text\n")
         self.setCursorPos(2, 1)
-        self.view.run_command('zorgmode_move_node_up')
+        self.view.run_command('zorg_move_node_up')
         self.assertEqual(
             self.getAllText(),
             "** Caption2\n"
@@ -164,7 +164,7 @@ class TestMoveNode(ZorgTestCase):
             "** Caption2\n"
             "text")
         self.setCursorPos(2, 1)
-        self.view.run_command('zorgmode_move_node_up')
+        self.view.run_command('zorg_move_node_up')
         self.assertEqual(
             self.getAllText(),
             "** Caption2\n"
@@ -182,14 +182,14 @@ class TestMoveNode(ZorgTestCase):
             "** subsection\n"
             "more text}")
         self.setCursorPos(1, 2)
-        self.view.run_command('zorgmode_cycle_all')
+        self.view.run_command('zorg_cycle_all')
         try:
             self.assertProperFolding()
         except:
             # do not want this test to spam output
             raise RuntimeError("folding is broken")
 
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "* Caption 2\n"
@@ -201,7 +201,7 @@ class TestMoveNode(ZorgTestCase):
             "more text}")
         self.assertProperFolding()
 
-        self.view.run_command('zorgmode_move_node_down')
+        self.view.run_command('zorg_move_node_down')
         self.assertEqual(
             self.getAllText(),
             "* Caption 2\n"

@@ -2,7 +2,7 @@
 	/* Orgmode */
     {
         "keys": ["alt+shift+right"],
-        "command": "zorgmode_cycle_todo_state_forward",
+        "command": "zorg_cycle_todo_state_forward",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -11,7 +11,7 @@
     },
     {
         "keys": ["alt+shift+left"],
-        "command": "zorgmode_cycle_todo_state_backward",
+        "command": "zorg_cycle_todo_state_backward",
         "context": [{
                 "key": "selector",
                 // "operator": "regex_match",
@@ -20,7 +20,7 @@
     },
     {
         "keys": ["tab"],
-        "command": "zorgmode_cycle",
+        "command": "zorg_cycle",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -29,7 +29,7 @@
     },
     {
         "keys": ["shift+tab"],
-        "command": "zorgmode_cycle_all",
+        "command": "zorg_cycle_all",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -38,7 +38,7 @@
     },
     {
         "keys": ["alt+up"],
-        "command": "zorgmode_move_node_up",
+        "command": "zorg_move_node_up",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -47,7 +47,7 @@
     },
     {
         "keys": ["alt+down"],
-        "command": "zorgmode_move_node_down",
+        "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -56,7 +56,7 @@
     },
     {
         "keys": ["alt+shift+right"],
-        "command": "zorgmode_toggle_checkbox",
+        "command": "zorg_toggle_checkbox",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -65,7 +65,7 @@
     },
     {
         "keys": ["ctrl+c", "ctrl+c"],
-        "command": "zorgmode_toggle_checkbox",
+        "command": "zorg_toggle_checkbox",
         "context": [
             {
                 "key": "selector",
@@ -82,7 +82,7 @@
     },
     {
         "keys": ["ctrl+shift+a"],
-        "command": "zorgmode_move_to_archive",
+        "command": "zorg_move_to_archive",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
@@ -91,7 +91,7 @@
     },
     {
         "keys": ["enter"],
-        "command": "zorgmode_follow_link",
+        "command": "zorg_follow_link",
         "context": [
             {
                 "key": "selector",

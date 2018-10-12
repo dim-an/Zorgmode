@@ -26,21 +26,21 @@ class TestMoveUp(ZorgTestCase):
             " - [ ] checkbox\n")
 
         self.setCursorPos(1, 1)
-        self.view.run_command('zorgmode_toggle_checkbox')
+        self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
             self.getAllText(),
             "* Caption\n"
             " - [ ] checkbox\n")
 
         self.setCursorPos(2, 1)
-        self.view.run_command('zorgmode_toggle_checkbox')
+        self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
             self.getAllText(),
             "* Caption\n"
             " - [X] checkbox\n")
 
         self.setCursorPos(2, 1)
-        self.view.run_command('zorgmode_toggle_checkbox')
+        self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
             self.getAllText(),
             "* Caption\n"
@@ -62,7 +62,7 @@ class TestMoveUp(ZorgTestCase):
 
         for i in range(len(TEST_STRING.strip('\n').split('\n'))):
             self.setCursorPos(i, 1)
-            self.view.run_command('zorgmode_toggle_checkbox')
+            self.view.run_command('zorg_toggle_checkbox')
 
         self.assertEqual(
             self.getAllText(),
