@@ -62,3 +62,14 @@ class TestFollowTextLink(ZorgTestCase):
 
         self.view.run_command("jump_back")
         self.assertEqual(self.getCursorPos(), (2, 12))
+
+    def test_link_abbreviations(self):
+        self.setText(
+            "* Header 1\n"
+            "some text [[hdr:1]]\n"
+            "#+LINK: hdr Header %s\n")
+        #    ^0   ^5   ^10
+
+        self.setCursorPos(2, 12)
+        self.view.run_command("zorg_follow_link")
+        self.assertEqual(self.getCursorPos(), (1, 1))
