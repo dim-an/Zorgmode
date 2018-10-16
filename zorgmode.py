@@ -113,6 +113,16 @@ class OrgmodeStructure(object):
     def find_all_headlines(self, min_level=1, max_level=MAX_HEADLINE_LEVEL):
         return find_all_headers(self.view, min_level=min_level, max_level=max_level)
 
+    # TODO: переименовать special_lines в control_lines
+    def iter_special_lines(self, line_tag):
+        if not re.match("^[A-Za-z0-9_]*$", line_tag):
+            raise ValueError("Bad line tag: {}".format(line_tag))
+
+        regexp = "^#[+]{}: *(.*) *$".format(line_tag)
+        text = self.view.substr(sublime.Region(0, self.view.size()))
+        for match in re.finditer(regexp, text, flags=re.MULTILINE):
+            yield match.group(1)
+
 def cycle_todo_state(view, edit, forward=True):
     STATUS_LIST = ['', 'TODO', 'DONE']
     if len(view.sel()) != 1:
@@ -489,20 +499,51 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
             sublime.status_message("cursor is not on the link")
             return
 
-        ref_handlers = [
-            ('http:', self.open_in_browser),
-            ('https:', self.open_in_browser),
-            ('file:', self.open_file),
-            ('file+sys:', self.open_sys_file),
-            ('', self.follow_header_link),
-        ]
-
-        for prefix, handler in ref_handlers:
-            if current_link.reference.startswith(prefix):
-                handler(view, current_link.reference)
+        ref_handlers = {
+            'http': self.open_in_browser,
+            'https': self.open_in_browser,
+            'file': self.open_file,
+            'file+sys': self.open_sys_file,
+        }
+        try:
+            url = self.expand_url(orgmode_structure, current_link.reference)
+        except RuntimeError as e:
+            sublime.status_message(str(e))
+            return
+        schema = url.split(":", 1)[0]
+        if schema in ref_handlers:
+            ref_handlers[schema](view, url)
+        else:
+            self.follow_header_link(view, url)
 
     def open_in_browser(self, view, url):
         webbrowser.open_new(url)
+
+    def expand_url(self, orgmode_structure, url):
+        original_url = url
+
+        expansion_rules = {}
+        for special_line in orgmode_structure.iter_special_lines("LINK"):
+            fields = special_line.split(None, 1)
+            if len(fields) != 2:
+                sublime.status_message("Bad link line: {}".format(special_line))
+                continue
+            abbreviation, replacement = fields
+            if abbreviation in expansion_rules:
+                sublime.status_message("Link abbreviation `{}' is used multiple times".format(abbreviation))
+            expansion_rules[abbreviation] = replacement
+
+        for i in range(30):
+            fields = url.split(":", 1)
+            if len(fields) != 2:
+                return url
+            schema, rest = fields
+            if schema in expansion_rules:
+                url = expansion_rules[schema] % rest
+            else:
+                return url
+        else:
+            raise RuntimeError("Expansion limit exceeded, while expanding url: {}".format(original_url))
 
     def open_file(self, view, url):
         file_path = url.split(':', 1)[-1] # strip scheme
@@ -515,7 +556,6 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         file_path = os.path.expanduser(file_path)
         # TODO: нужно сделать для других типов файлов
         subprocess.check_call(['xdg-open', file_path])
-        
 
     def follow_header_link(self, view, caption):
         org_document = zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
