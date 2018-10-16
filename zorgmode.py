@@ -63,8 +63,10 @@ def find_links_in_string(text):
         processed_end = end_marker + 2
 
 class OrgmodeStructure(object):
-    SectionInfo = collections.namedtuple('SectionInfo',
-                                         'headline_region,headline_level,section_region,content_region')
+    SectionInfo = collections.namedtuple(
+        'SectionInfo',
+        ['headline_region', 'headline_level', 'section_region', 'content_region'])
+
     def __init__(self, view):
         self.view = view
 
@@ -558,7 +560,7 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         subprocess.check_call(['xdg-open', file_path])
 
     def follow_header_link(self, view, caption):
-        org_document = zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
+        org_document = zorg_parse_document(view)
         offset = None
         for section in org_document.iter_section():
             text = section.headline.title.get_text()
