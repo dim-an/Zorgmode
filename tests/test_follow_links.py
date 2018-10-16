@@ -22,9 +22,7 @@ class TestFollowTextLink(ZorgTestCase):
         #    ^0   ^5   ^10
         self.setCursorPos(2, 12)
         self.view.run_command("zorg_follow_link")
-        row, column = self.getCursorPos()
-        self.assertEqual(row, 1)
-        self.assertEqual(column, 1)
+        self.assertEqual(self.getCursorPos(), (1, 1))
 
     def test_simple_follow_link_header_tags(self):
         self.setText(
@@ -34,9 +32,7 @@ class TestFollowTextLink(ZorgTestCase):
             "** Header 2 :some_tag:another_tag:\n")
         self.setCursorPos(1, 12)
         self.view.run_command("zorg_follow_link")
-        row, column = self.getCursorPos()
-        self.assertEqual(row, 3)
-        self.assertEqual(column, 1)
+        self.assertEqual(self.getCursorPos(), (3, 1))
         
     def test_simple_follow_link_everything(self):
         self.setText(
@@ -46,9 +42,7 @@ class TestFollowTextLink(ZorgTestCase):
             "** TODO [#c]  Header 2  :some_tag:another_tag:  \n")
         self.setCursorPos(1, 22)
         self.view.run_command("zorg_follow_link")
-        row, column = self.getCursorPos()
-        self.assertEqual(row, 3)
-        self.assertEqual(column, 1)
+        self.assertEqual(self.getCursorPos(), (3, 1))
 
     def test_follow_link_jump_back(self):
         self.setText(
