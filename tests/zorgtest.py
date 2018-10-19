@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sublime
+from contextlib import contextmanager
 from unittest import TestCase
+
+import sublime
 
 class ZorgTestCase(TestCase):
     def setUp(self):
@@ -34,3 +36,13 @@ class ZorgTestCase(TestCase):
 
     def getAllText(self):
         return self.view.substr(sublime.Region(0, self.view.size()))
+
+    @contextmanager
+    def ensureNothingChanges(self):
+        old_text = self.getAllText()
+        old_cursor_pos = self.getCursorPos()
+
+        yield
+
+        self.assertEqual(self.getAllText(), old_text)
+        self.assertEqual(self.getCursorPos(), old_cursor_pos)

@@ -358,6 +358,4 @@ if __name__ == '__main__':
                                         '#+ARCHIVE:foo\n')
             self.assertEqual(document.archive, 'foo')
 
-if __name__ == '__main__':
-    import unittest
     unittest.main()

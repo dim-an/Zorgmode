@@ -1,16 +1,25 @@
 # -*- coding: utf-8 -*-
 
-import webbrowser
 import collections
 import itertools
 import os
 import re
 import subprocess
+import webbrowser
 
 import sublime_plugin
 import sublime
 
 from . import zorg_parse
+from .zorg_view_parse import (
+    LIST_ENTRY_BEGIN_RE,
+
+    OrgListParser,
+
+    find_child_containing_point,
+    next_sibling,
+    prev_sibling
+)
 
 try:
     import Default.history_list as history_list_plugin
@@ -20,6 +29,9 @@ except ImportError:
 MAX_HEADLINE_LEVEL = 30
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
+
+class ZorgmodeError(RuntimeError):
+    pass
 
 if history_list_plugin:
     def save_position_for_jump_history(view):
@@ -62,6 +74,7 @@ def find_links_in_string(text):
             text=link_text))
         processed_end = end_marker + 2
 
+
 class OrgmodeStructure(object):
     SectionInfo = collections.namedtuple(
         'SectionInfo',
@@ -69,6 +82,12 @@ class OrgmodeStructure(object):
 
     def __init__(self, view):
         self.view = view
+
+    def is_cursor_over_list_entry(self):
+        view = self.view
+
+        current_line = view.substr(self.get_line_region())
+        return LIST_ENTRY_BEGIN_RE.match(current_line)
 
     def get_cursor_point(self):
         view = self.view
@@ -82,6 +101,7 @@ class OrgmodeStructure(object):
     def get_line_region(self, point=None):
         view = self.view
         if point is None:
+            # TODO: use get_cursor_point()
             if len(view.sel()) != 1:
                 return None
             sel, = view.sel()
@@ -89,6 +109,66 @@ class OrgmodeStructure(object):
                 return None
             point = sel.a
         return view.line(point)
+
+    def parse_current_org_list(self):
+        view = self.view
+
+        view_size = view.size()
+
+        # 1. Нужно получить список строк исходного файла.
+        line_region_list = view.lines(sublime.Region(0, view_size))
+        for region in line_region_list:
+            # We want our regions to include trailing '\n'
+            if region.b != view_size:
+                region.b += 1
+            
+        current_line_index, _ = view.rowcol(self.get_cursor_point())
+
+        # 2. Нужно идти назад пока не будем уверены, что списка дальше нет.
+        before_org_list_start = current_line_index - 1
+        empty_line_count = 0
+        while before_org_list_start >= 0:
+            line = view.substr(line_region_list[before_org_list_start])
+            if re.match("^ *$", line):
+                empty_line_count += 1
+            else:
+                empty_line_count = 0
+
+            if empty_line_count >= 2:
+                break
+
+            if line.startswith(" ") or LIST_ENTRY_BEGIN_RE.match(line):
+                before_org_list_start -= 1
+                continue
+            break
+
+        # 3. Нужно идти вперёд пока не найдём начало списка.
+        org_list_start = before_org_list_start + 1
+        while org_list_start < len(line_region_list):
+            line = view.substr(line_region_list[org_list_start])
+            if LIST_ENTRY_BEGIN_RE.match(line):
+                break
+            org_list_start += 1
+        else:
+            raise ZorgmodeError("Cursor is not positioned over list entry")
+
+        # 4. Нужно распарсить лист.
+        parser = OrgListParser(view)
+        line_idx = org_list_start
+        while (
+            line_idx < len(line_region_list)
+            and parser.try_push_line(line_region_list[line_idx])
+        ):
+            line_idx += 1
+        return parser.finish()
+
+    def get_list_entry_info(self, point=None):
+        view = self.view
+        current_line_region = self.get_line_region(point=point)
+        current_line = view.substr(current_line_region)
+        match = re.search(r'^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+', current_line)
+        if match is None:
+            return
 
     def get_section_info(self, point=None):
         view = self.view
@@ -287,11 +367,15 @@ def swap_regions(view, edit, region1, region2):
     if region1.a > region2.a:
         return swap_regions(view, edit, region2, region1)
 
-    if not is_line_start(view, region1.a) or not is_line_start(view, region1.b):
-        raise ValueError
+    if not is_line_start(view, region1.a):
+        raise ValueError("First region must begin at line start")
+    if not is_line_start(view, region1.b) and region1.b != view.size():
+        raise ValueError("First region must end at line start")
 
-    if not is_line_start(view, region2.a) or (not is_line_start(view, region2.b) and region2.b != view.size()):
-        raise ValueError
+    if not is_line_start(view, region2.a):
+        raise ValueError("Second region must begin at line start")
+    if not is_line_start(view, region2.b) and region2.b != view.size():
+        raise ValueError("Second region must end at line start")
 
     added_new_line = False
     if not is_line_start(view, region2.b):
@@ -329,7 +413,29 @@ def swap_regions(view, edit, region1, region2):
     view.fold(region_to_refold_list)
 
 
-def move_current_node(view, edit, up=True):
+def move_current_list_entry(view, edit, up=True):
+    # TODO: factorize
+    if len(view.sel()) != 1 or not view.sel()[0].empty():
+        return
+
+    # найти текущий элемент списка
+    orgmode_structure = OrgmodeStructure(view)
+    org_list_node = orgmode_structure.parse_current_org_list()
+
+    child = find_child_containing_point(org_list_node, orgmode_structure.get_cursor_point())
+    if up:
+        sibling = prev_sibling(child)
+    else:
+        sibling = next_sibling(child)
+
+    if sibling is None:
+        return
+
+    swap_regions(view, edit, child.region, sibling.region)
+    view.show(view.sel()[0].a)
+
+
+def move_current_section(view, edit, up=True):
     if len(view.sel()) != 1 or not view.sel()[0].empty():
         return
     
@@ -404,12 +510,20 @@ class ZorgCycleAll(sublime_plugin.TextCommand):
 
 class ZorgMoveNodeUp(sublime_plugin.TextCommand):
     def run(self, edit):
-        move_current_node(self.view, edit, up=True)
+        structure = OrgmodeStructure(self.view)
+        if structure.is_cursor_over_list_entry():
+            move_current_list_entry(self.view, edit, up=True)
+        else:
+            move_current_section(self.view, edit, up=True)
 
 
 class ZorgMoveNodeDown(sublime_plugin.TextCommand):
     def run(self, edit):
-        move_current_node(self.view, edit, up=False)
+        structure = OrgmodeStructure(self.view)
+        if structure.is_cursor_over_list_entry():
+            move_current_list_entry(self.view, edit, up=False)
+        else:
+            move_current_section(self.view, edit, up=False)
 
 
 class ZorgToggleCheckbox(sublime_plugin.TextCommand):

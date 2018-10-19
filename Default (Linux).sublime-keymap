@@ -45,12 +45,30 @@
         }]
     },
     {
+        "keys": ["alt+up"],
+        "command": "zorg_move_node_up",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "org.text.list.entry"
+        }]
+    },
+    {
         "keys": ["alt+down"],
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
                 "operator": "equal",
                 "operand": "org.text.headline"
+        }]
+    },
+    {
+        "keys": ["alt+down"],
+        "command": "zorg_move_node_down",
+        "context": [{
+                "key": "selector",
+                "operator": "equal",
+                "operand": "org.text.list.entry"
         }]
     },
     {
