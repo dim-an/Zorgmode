@@ -20,12 +20,12 @@ git clone git@github.com:dim-an/zorgmode.git
 | zorg_cycle_all                       | shift+tab             | any                  | cycles through visibility of all trees            |
 |--------------------------------------|-----------------------|----------------------|---------------------------------------------------|
 | zorg_move_node_up                    | alt+up                | headline / list item | moves current section (or list item) up (or down) |
-| ----------------------------------   | -------------------   |                      |                                                   |
+|--------------------------------------|-----------------------|                      |                                                   |
 | zorg_move_node_down                  | alt+down              |                      |                                                   |
 |--------------------------------------|-----------------------|----------------------|---------------------------------------------------|
 | zorg_cycle_todo_state_forward        | alt+shift+right       | todo headline        | Cycles headline between states:                   |
 |                                      |                       |                      | - TODO                                            |
-| ------------------------------------ | --------------------- |                      | - DONE                                            |
+|--------------------------------------|-----------------------|                      | - DONE                                            |
 | zorg_cycle_todo_state_backward       | alt+shift+left        |                      | - <empty state>                                   |
 |--------------------------------------|-----------------------|----------------------|---------------------------------------------------|
 | zorg_toggle_checkbox                 | alt+shift+left        | checkbox list item   | toggles checkbox between                          |
@@ -38,7 +38,6 @@ git clone git@github.com:dim-an/zorgmode.git
 * Features
 Currently zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
 
-
 ** Cycle of visibility of sections
 You can use tab when cursor is over section header to fold/unfold this section
 
@@ -48,6 +47,9 @@ You can use shift+tab to cycle among document visibility modes:
   - show all :: all the content is visible
 
 ** TODO Hyperlinks
+You can insert links in your document. Link can be in one of two forms:
+  1. =[[link-destination][link-destination]]= (e.g. ~[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]~)
+  2. =[[link-desctination]]= (e.g. =[[https://github.com/dim-an/zorgmode]]=)
 *** TODO Link abbreviations
 ** TODO Todos and checkboxes
 ** TODO Structural editing
