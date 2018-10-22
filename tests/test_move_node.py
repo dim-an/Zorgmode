@@ -388,3 +388,55 @@ class TestMoveListEntry(ZorgTestCase):
 
         with self.ensureNothingChanges():
             self.view.run_command('zorg_move_node_up')
+
+
+
+    def test_empty_lines(self):
+        self.setText(
+            "  * 0000\n"
+            "\n"
+            "\n"
+            "  * 1111\n"
+            " \n"
+            "  * 2222\n"
+            " \n"
+            " \n"
+            " * 3333\n"
+        )
+        self.setCursorPos(4, 1)
+
+        self.view.run_command('zorg_move_node_down')
+        self.assertEqual(
+            self.getAllText(),
+            "  * 0000\n"
+            "\n"
+            "\n"
+            "  * 2222\n"
+            " \n"
+            "  * 1111\n"
+            " \n"
+            " \n"
+            " * 3333\n"
+        )
+        self.assertEqual(self.getCursorPos(), (6, 1))
+
+        with self.ensureNothingChanges():
+            self.view.run_command('zorg_move_node_down')
+
+        self.view.run_command('zorg_move_node_up')
+        self.assertEqual(
+            self.getAllText(),
+            "  * 0000\n"
+            "\n"
+            "\n"
+            "  * 1111\n"
+            " \n"
+            "  * 2222\n"
+            " \n"
+            " \n"
+            " * 3333\n"
+        )
+        self.assertEqual(self.getCursorPos(), (4, 1))
+
+        with self.ensureNothingChanges():
+            self.view.run_command('zorg_move_node_up')

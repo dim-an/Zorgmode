@@ -95,6 +95,7 @@ class OrgListParser(object):
         self._result = OrgRoot(view)
         self._stack = [self._result]
         self._view = view
+        self._empty_lines = 0
 
     def try_push_line(self, region):
         line = self._view.substr(region)
@@ -102,7 +103,13 @@ class OrgListParser(object):
         if line.startswith("*"):
             return False
 
-        # TODO: empty lines
+        line_is_empty = not bool(line.strip())
+        if line_is_empty:
+            self._empty_lines += 1
+            print(line, self._empty_lines)
+            return bool(self._empty_lines < 2)
+        else:
+            self._empty_lines = 0
 
         indent = _calc_indent(line)
         m = LIST_ENTRY_BEGIN_RE.match(line)
@@ -144,6 +151,7 @@ class OrgListParser(object):
     
     def finish(self):
         self._stack = None
+        self._result.debug_print()
         return self._result
 
 

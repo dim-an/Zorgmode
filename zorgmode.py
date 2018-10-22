@@ -123,15 +123,15 @@ class OrgmodeStructure(object):
         empty_line_count = 0
         while before_org_list_start >= 0:
             line = view.substr(line_region_list[before_org_list_start])
-            if re.match("^ *$", line):
+            line_is_empty = not line.strip()
+            if line_is_empty:
                 empty_line_count += 1
+                if empty_line_count >= 2:
+                    break
             else:
                 empty_line_count = 0
 
-            if empty_line_count >= 2:
-                break
-
-            if line.startswith(" ") or LIST_ENTRY_BEGIN_RE.match(line):
+            if line.startswith(" ") or LIST_ENTRY_BEGIN_RE.match(line) or line_is_empty:
                 before_org_list_start -= 1
                 continue
             break
