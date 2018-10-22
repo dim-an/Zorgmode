@@ -48,4 +48,4 @@ script:
     #- codecov
 
 notifications:
-email: false
+    email: false
