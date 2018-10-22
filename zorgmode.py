@@ -101,13 +101,7 @@ class OrgmodeStructure(object):
     def get_line_region(self, point=None):
         view = self.view
         if point is None:
-            # TODO: use get_cursor_point()
-            if len(view.sel()) != 1:
-                return None
-            sel, = view.sel()
-            if not sel.empty():
-                return None
-            point = sel.a
+            point = self.get_cursor_point()
         return view.line(point)
 
     def parse_current_org_list(self):

@@ -17,7 +17,6 @@ def find_child_containing_point(node, point):
 
     while node.children:
         for child in node.children:
-            print(point, child.region)
             if is_point_within_region(point, child.region):
                 node = child
                 break
@@ -62,7 +61,7 @@ class OrgViewNode(object):
         if indent is None:
             indent = 0
         indent_str = " " * indent
-        print(indent_str + repr(self))
+        print(indent_str + repr(self), file=None)
         for c in self.children:
             c.debug_print(indent+2)
 
@@ -93,7 +92,8 @@ class OrgListEntry(OrgViewNode):
 
 class OrgListParser(object):
     def __init__(self, view):
-        self.stack = [OrgRoot(view)]
+        self.result = OrgRoot(view)
+        self.stack = [self.result]
         self.view = view
 
     def try_push_line(self, region):
@@ -143,9 +143,8 @@ class OrgListParser(object):
         return True
     
     def finish(self):
-        result = self.stack[0]
         self.stack = None
-        return result
+        return self.result
 
 
 #
