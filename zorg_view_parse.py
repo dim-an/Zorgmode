@@ -92,12 +92,12 @@ class OrgListEntry(OrgViewNode):
 
 class OrgListParser(object):
     def __init__(self, view):
-        self.result = OrgRoot(view)
-        self.stack = [self.result]
-        self.view = view
+        self._result = OrgRoot(view)
+        self._stack = [self._result]
+        self._view = view
 
     def try_push_line(self, region):
-        line = self.view.substr(region)
+        line = self._view.substr(region)
 
         if line.startswith("*"):
             return False
@@ -108,43 +108,43 @@ class OrgListParser(object):
         m = LIST_ENTRY_BEGIN_RE.match(line)
         if m is not None:
             while (
-                self.stack[-1].node_type != "root"
+                self._stack[-1].node_type != "root"
                 and (
-                    isinstance(self.stack[-1], OrgList) and self.stack[-1].indent > indent
-                    or isinstance(self.stack[-1], OrgListEntry) and self.stack[-1].indent >= indent
+                    isinstance(self._stack[-1], OrgList) and self._stack[-1].indent > indent
+                    or isinstance(self._stack[-1], OrgListEntry) and self._stack[-1].indent >= indent
                 )
             ):
-                self.stack.pop()
-                assert self.stack
+                self._stack.pop()
+                assert self._stack
 
             if (
-                not isinstance(self.stack[-1], OrgList)
-                or self.stack[-1].indent < indent
+                not isinstance(self._stack[-1], OrgList)
+                or self._stack[-1].indent < indent
             ):
-                self.stack.append(OrgList(self.view, self.stack[-1], indent))
+                self._stack.append(OrgList(self._view, self._stack[-1], indent))
 
-            self.stack.append(OrgListEntry(self.view, self.stack[-1], indent))
-            _extend_region(self.stack[-1], region)
+            self._stack.append(OrgListEntry(self._view, self._stack[-1], indent))
+            _extend_region(self._stack[-1], region)
             return True
 
         while (
-            self.stack
+            self._stack
             and not (
-                isinstance(self.stack[-1], OrgListEntry)
-                and self.stack[-1].indent < indent)
+                isinstance(self._stack[-1], OrgListEntry)
+                and self._stack[-1].indent < indent)
         ):
-            self.stack.pop()
+            self._stack.pop()
 
-        if not self.stack:
+        if not self._stack:
             return False
 
-        assert isinstance(self.stack[-1], OrgListEntry)
-        _extend_region(self.stack[-1], region)
+        assert isinstance(self._stack[-1], OrgListEntry)
+        _extend_region(self._stack[-1], region)
         return True
     
     def finish(self):
-        self.stack = None
-        return self.result
+        self._stack = None
+        return self._result
 
 
 #
