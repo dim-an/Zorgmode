@@ -1,52 +1,52 @@
 # SYNTAX TEST "Packages/zorgmode/zorgmode.sublime-syntax"
 
 * Some headline
-# <- org.text.headline.1
+# <- heading.1.text.org
 ** Some headline level 2
-# <- org.text.headline.2
+# <- heading.2.text.org
 *** Some headline level 3
-# <- org.text.headline.3
+# <- heading.3.text.org
 **** Some headline level 4
-# <- org.text.headline.4
+# <- heading.4.text.org
 ***** Some headline level 5
-# <- org.text.headline.5p
+# <- heading.5p.text.org
 ****** Some headline level 6
-# <- org.text.headline.5p
+# <- heading.5p.text.org
 
 *this is not headline
-# <- org.text
+# <- text.org
 
 
 Some text
-# <- org.text
+# <- text.org
 
  - list entry
-# <- org.text.list.entry
+# <- entry.list.text.org
 
  * list entry
-# <- org.text.list.entry
+# <- entry.list.text.org
 
  1. list entry
-# <- org.text.list.entry
+# <- entry.list.text.org
  
  a. list entry
-# <- org.text.list.entry
+# <- entry.list.text.org
 
  * headline
-# <- org.text.list.entry
+# <- entry.list.text.org
 
 [[some link]]
-# ^^^^^^^^^ org.text.link.reference
+# ^^^^^^^^^ reference.link.text.org
 
 - some text [[link]] [[link_address][text]]
-#             ^^^^ org.text.link.reference
-#                      ^^^^^^^^^^^^ org.text.link.reference
-#                                    ^^^^ org.text.link.text
-# ^^ org.text.list.entry
+#             ^^^^ reference.link.text.org
+#                      ^^^^^^^^^^^^ reference.link.text.org
+#                                    ^^^^ text.link.text.org
+# ^^^^^^^^^ entry.list.text.org
 
 [[broken link]
 * nonbroken headline
-# ^ org.text.headline.1
+# ^ heading.1.text.org
 
 #+ARCHIVE: foobar
-# <- org.text.special_line
+# <- special_line.text.org

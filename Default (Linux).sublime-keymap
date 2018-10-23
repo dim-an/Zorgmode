@@ -5,8 +5,7 @@
         "command": "zorg_cycle_todo_state_forward",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.headline"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -14,7 +13,7 @@
         "command": "zorg_cycle_todo_state_backward",
         "context": [{
                 "key": "selector",
-                "operand": "org.text.headline"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -22,8 +21,7 @@
         "command": "zorg_cycle",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.headline"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -31,8 +29,7 @@
         "command": "zorg_cycle_all",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text"
+                "operand": "text.org"
         }]
     },
     {
@@ -40,8 +37,7 @@
         "command": "zorg_move_node_up",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.headline"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -49,8 +45,7 @@
         "command": "zorg_move_node_up",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.list.entry"
+                "operand": "entry.list.text.org"
         }]
     },
     {
@@ -58,8 +53,7 @@
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.headline"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -67,7 +61,6 @@
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
                 "operand": "org.text.list.entry"
         }]
     },
@@ -76,8 +69,7 @@
         "command": "zorg_toggle_checkbox",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.list.entry"
+                "operand": "entry.list.text.org"
         }]
     },
     {
@@ -86,12 +78,10 @@
         "context": [
             {
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text.list.entry"
+                "operand": "entry.list.text.org"
             },
             {
                 "key": "selection_empty",
-                "operator": "equal",
                 "operand": true,
                 "match_all": true
             }
@@ -102,8 +92,7 @@
         "command": "zorg_move_to_archive",
         "context": [{
                 "key": "selector",
-                "operator": "equal",
-                "operand": "org.text"
+                "operand": "heading & text.org"
         }]
     },
     {
@@ -113,7 +102,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "org.text.link"
+                "operand": "reference.link.text.org | text.link.text.org"
             },
             {
                 "key": "preceding_text",

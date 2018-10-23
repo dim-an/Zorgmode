@@ -52,7 +52,7 @@
             <key>name</key>
             <string>zorgmode headline</string>
             <key>scope</key>
-            <string>org.text.headline.1</string>
+            <string>heading.1.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -63,7 +63,7 @@
             <key>name</key>
             <string>zorgmode headline</string>
             <key>scope</key>
-            <string>org.text.headline.2</string>
+            <string>heading.2.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -74,7 +74,7 @@
             <key>name</key>
             <string>zorgmode headline</string>
             <key>scope</key>
-            <string>org.text.headline.3</string>
+            <string>heading.3.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -85,7 +85,7 @@
             <key>name</key>
             <string>zorgmode headline</string>
             <key>scope</key>
-            <string>org.text.headline.4</string>
+            <string>heading.4.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -96,7 +96,7 @@
             <key>name</key>
             <string>zorgmode headline</string>
             <key>scope</key>
-            <string>org.text.headline.5p</string>
+            <string>heading.5p.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -107,7 +107,18 @@
             <key>name</key>
             <string>zorgmode link</string>
             <key>scope</key>
-            <string>org.text.link</string>
+            <string>reference.link.text.org</string>
+            <key>settings</key>
+            <dict>
+              <key>foreground</key>
+              <string>#FFFFAA</string>
+           </dict>
+        </dict>
+        <dict>
+            <key>name</key>
+            <string>zorgmode link</string>
+            <key>scope</key>
+            <string>text.link.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -118,7 +129,7 @@
         	<key> name</key>
         	<string>zorgmode broken link</string>
         	<key>scope</key>
-        	<string>org.text.link.broken</string>
+        	<string>broken.link.text.org</string>
         	<key>settings</key>
         	<dict>
         		<key>foreground</key>
@@ -129,7 +140,7 @@
             <key>name</key>
             <string>zorgmode special line</string>
             <key>scope</key>
-            <string>org.text.special_line</string>
+            <string>special_line.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>

@@ -1,7 +1,7 @@
 %YAML 1.2
 ---
 file_extensions: [org, org_archive]
-scope: org.text
+scope: text.org
 name: zorgmode
 
 contexts:
@@ -16,7 +16,7 @@ contexts:
           push: list_entry
     
     list_entry:
-        - meta_scope: org.text.list.entry
+        - meta_scope: entry.list.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true
@@ -35,31 +35,31 @@ contexts:
 
 
     headline1:
-        - meta_scope: org.text.headline.1
+        - meta_scope: heading.1.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true 
 
     headline2:
-        - meta_scope: org.text.headline.2
+        - meta_scope: heading.2.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true 
 
     headline3:
-        - meta_scope: org.text.headline.3
+        - meta_scope: heading.3.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true 
 
     headline4:
-        - meta_scope: org.text.headline.4
+        - meta_scope: heading.4.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true
 
     headline5p:
-        - meta_scope: org.text.headline.5p
+        - meta_scope: heading.5p.text.org
         - include: expect_link
         - match: '(\n)?$'
           pop: true
@@ -69,23 +69,23 @@ contexts:
           push: link
 
     link:
-        - meta_scope: org.text.link.reference
+        - meta_scope: reference.link.text.org
         - match: '\]\]'
           pop: true
         - match: '\]\['
           set: link_text
         - match: '[^\]]*(\]?)$'
-          scope: org.text.link.broken
+          scope: broken.link.text.org
           pop: true
     
     link_text:
-        - meta_scope: org.text.link.text
+        - meta_scope: text.link.text.org
         - match: '\]\]'
           pop: true
         - match: '[^\]]*(\]?)$'
-          scope: org.text.link.broken
+          scope: broken.link.text.org
           pop: true
 
     expect_special_line:
         - match: '^#\+[A-Z_]+:.*$'
-          scope: org.text.special_line
+          scope: special_line.text.org
