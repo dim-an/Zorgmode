@@ -36,22 +36,29 @@ This plugin is inspired by [[https://orgmode.org/][org mode]] for emacs.
 
 * Org syntax crash course
 : org is a markup language similar to markdown or reStructuredText.
-: * Level 1 header
+:
+: * Headers (<- this is example of level 1 header)
 : Line that starts with several stars is a header.
-: ** Level 2 header
-: *** Level 3 header
-: org has various kinds of lists, you can use - / + / * / 1. / 1) / a. / a). List items can span multiple lines.
+: ** Example of level 2 header
+: *** Example of level 3 header
+:
+: * Lists
+: org has various kinds of lists. You can use `-' `+' `*'. List items can span multiple lines.
 :  - item1
 :    continuation of item1 must be properly indented
 :  - item2
-: 	that has sublist
+: 	and item2 has sublist
 : 	* child1
 : 	* child2
+:
+: Enumerated lists can be created using number that is follwed by '.' or ')' (e.g. '1.' or '2)')
+: Instead of number letter can be used e.g. 'a.' or 'c)'
 : 
 : * Links
-:  - [[http://github.com/][GitHub]] <- this is link
-:  - [[http://github.com/]] <- this is also link
+:  - [[http://github.com/][GitHub]] <- this is a link
+:  - [[http://github.com/]] <- this is also a link
 :  - http://github.com/ <- this is yet another link
+:
 : * Projects and checkbox item
 : Headline that starts with TODO / DONE is a project, like this
 : ** TODO Explain projects and checkboxes
