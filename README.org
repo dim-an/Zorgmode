@@ -1,8 +1,5 @@
 Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeText 3.
 
-* Introduction
-This plugin is inspired by [[https://orgmode.org/][org mode]] for emacs.
-
 * Installation
 : # Go to Packages directory (you can find one using menu =Preferences= -> =Browse Packages=).
 : cd /path/to/package/directory
