@@ -30,6 +30,8 @@ MAX_HEADLINE_LEVEL = 30
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
+URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+
 class ZorgmodeError(RuntimeError):
     pass
 
@@ -56,10 +58,10 @@ def find_links_in_string(text):
     while True:
         start_marker = text.find("[[", processed_end)
         if start_marker == -1:
-            return link_list
+            break
         end_marker = text.find("]]", start_marker)
         if end_marker == -1:
-            return link_list
+            break
         separation_marker = text.find("][", start_marker, end_marker)
         if separation_marker == -1:
             link_text = None
@@ -73,6 +75,19 @@ def find_links_in_string(text):
             reference=link_reference,
             text=link_text))
         processed_end = end_marker + 2
+
+    for m in URL_RE.finditer(text):
+        start = m.start()
+        end = m.end()
+        url = m.group(0)
+        link_list.append(
+            OrgLinkInfo(
+                start=start,
+                end=end,
+                reference=url,
+                text=url))
+
+    return link_list
 
 
 class OrgmodeStructure(object):
@@ -679,3 +694,9 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
             sublime.status_message("can't follow link, text is not found: `{}'".format(caption))
             return
         goto(view, offset)
+
+
+class ZorgCycleListState(object):
+    def run(self, edit):
+        orgmode_structure = OrgmodeStructure(self.view)
+        org_list_node = orgmode_structure.parse_current_org_list()
