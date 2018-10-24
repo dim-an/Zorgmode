@@ -34,13 +34,15 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 * Org syntax crash course
 : org is a markup language similar to markdown or reStructuredText.
 :
-: * Headers (<- this is example of level 1 header)
-: Line that starts with several stars is a header.
-: ** Example of level 2 header
-: *** Example of level 3 header
+: * Headlines (<- this is example of level 1 headline)
+: Line that starts with one or more stars is a headline.
+: ** Example of level 2 headline
+: *** Example of level 3 headline
+: ** Headline level 2 again
 :
 : * Lists
-: org has various kinds of lists. You can use `-' `+' `*'. List items can span multiple lines.
+: org has various kinds of lists. You can use `-' `+' `*' to make an unoredered list.
+: List items can span multiple lines.
 :  - item1
 :    continuation of item1 must be properly indented
 :  - item2
@@ -48,8 +50,9 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 : 	* child1
 : 	* child2
 :
-: Enumerated lists can be created using number that is follwed by '.' or ')' (e.g. '1.' or '2)')
-: Instead of number letter can be used e.g. 'a.' or 'c)'
+: Ordered lists can be created using numeral that is follwed by either '.' or ')'.
+:  1. First item.
+:  2. Second item.
 : 
 : * Links
 :  - [[http://github.com/][GitHub]] <- this is a link
@@ -60,16 +63,16 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 : Headline that starts with TODO / DONE is a project, like this
 : ** TODO Explain projects and checkboxes
 : List item that starts with [ ] / [X] is a checkbox list item
-:  a. [ ] unchecked list item
-:  b. [X] checked list item    
+:  - [ ] unchecked list item
+:  - [X] checked list item    
 
 * Features
 Currently zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
 
 ** Cycle of visibility of sections
-You can use =Tab= (command =zorg_cycle=) when cursor is over section header to fold/unfold this section.
+When cursor is over headline =zorg_cycle= (Linux: =Tab=) folds/unfolds corresponding section.
 
-You can use =Shift+Tab= (command =zorg_cycle_all=) to cycle among document visibility modes:
+=zorg_cycle_all= (Linux: =Shift+Tab=) cycles among document visibility modes:
   - overview :: only top level headers are visible
   - contents :: all headers are visible but content is hidden
   - show all :: all the content is visible
@@ -79,7 +82,7 @@ You can insert links in your document. Link can be in one of two forms:
   1. =[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]=
   2. =[[https://github.com/dim-an/zorgmode]]=)
 
-To follow a link you should place cursor over it and hit =Enter= (=zorg_follow_link= command).
+To follow a link you should place cursor over it use =zorg_follow_link= (Linux: =Enter=).
 There are multiple types of links some of them will be opened using external application and others will be opened inside SublimeText.
 For the latter ones you can use default SublimeText3 commands =Jump Back= / =Jump Forward= (from =Goto= menu) in order to get browser-like forward/backward navigation.
 
@@ -104,7 +107,7 @@ Headlines that starts with =TODO= or =DONE= keyword are projects
 : * TODO Write documentation
 : ** DONE Explain org syntax
 : ** TODO Explain all the commands
-You can use =Alt+Shift+Right= (command =zorg_cycle_todo_state_forward=) and =Alt+Shift+Left= (command =zorg_cycle_todo_state_backward=) to cycle between project states:
+Commands =zorg_cycle_todo_state_forward= (Linux: =Alt+Shift+Right=) and =zorg_cycle_todo_state_backward= (Linux: =Alt+Shift+Left=) cycle between project states (cursor must be over project headline):
   - =TODO=
   - =DONE=
   - empty state (not a project)
