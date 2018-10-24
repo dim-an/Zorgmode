@@ -107,7 +107,7 @@
             <key>name</key>
             <string>zorgmode link</string>
             <key>scope</key>
-            <string>reference.link.text.org</string>
+            <string>link.text.org</string>
             <key>settings</key>
             <dict>
               <key>foreground</key>
@@ -118,23 +118,14 @@
             <key>name</key>
             <string>zorgmode link</string>
             <key>scope</key>
-            <string>text.link.text.org</string>
+            <string>markup.underline.link.text.org</string>
             <key>settings</key>
             <dict>
+              <key>fontStyle</key>
+              <string>underline</string>
               <key>foreground</key>
               <string>#FFFFAA</string>
            </dict>
-        </dict>
-        <dict>
-        	<key> name</key>
-        	<string>zorgmode broken link</string>
-        	<key>scope</key>
-        	<string>broken.link.text.org</string>
-        	<key>settings</key>
-        	<dict>
-        		<key>foreground</key>
-        		<string>#FF0000</string>
-        	</dict>
         </dict>
         <dict>
             <key>name</key>

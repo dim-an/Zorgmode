@@ -65,27 +65,46 @@ contexts:
           pop: true
 
     expect_link:
-        - match: '\[\['
-          push: link
-
-    link:
-        - meta_scope: reference.link.text.org
-        - match: '\]\]'
-          pop: true
-        - match: '\]\['
-          set: link_text
-        - match: '[^\]]*(\]?)$'
-          scope: broken.link.text.org
-          pop: true
+        - include: expect_link_no_description
+        - include: expect_link_with_description
+        - include: expect_link_url_like
     
-    link_text:
-        - meta_scope: text.link.text.org
-        - match: '\]\]'
-          pop: true
-        - match: '[^\]]*(\]?)$'
-          scope: broken.link.text.org
-          pop: true
+    expect_link_no_description:
+        - match: |-
+            (?x:
+              \[\[
+                (
+                  (?:[^\[\]]|\\\[|\\\])*
+                )
+              \]\]
+            )
+          captures:
+            0: link.text.org
+            1: markup.underline.link.text.org
 
+    expect_link_with_description:
+        - match: |-
+            (?x:
+              \[\[
+                (?: # TODO: use variable
+                  (?:[^\[\]]|\\\[|\\\])*
+                )
+              \]\[
+                (
+                  (?:[^\[\]]|\\\[|\\\])*
+                )
+              \]\]        
+            )
+          captures:
+            0: link.text.org
+            1: markup.underline.link.text.org
+
+    expect_link_url_like:
+      # Honestly copypasted from http://urlregex.com/
+      - match: '(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)'
+        captures:
+          0: link.text.org
+          1: markup.underline.link.text.org
     expect_special_line:
         - match: '^#\+[A-Z_]+:.*$'
           scope: special_line.text.org

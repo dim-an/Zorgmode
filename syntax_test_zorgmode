@@ -35,13 +35,21 @@ Some text
  * headline
 # <- entry.list.text.org
 
-[[some link]]
-# ^^^^^^^^^ reference.link.text.org
+ [[some link]]
+#^^^^^^^^^^^^^ link.text.org
+#  ^^^^^^^^^ markup.underline.link.text.org
+
+ [[ref][description]]
+#^^^^^^^^^^^^^^^^^^^^ link.text.org
+#       ^^^^^^^^^^^ markup.underline.link.text.org
+
+ http://www.example.com/
+#^^^^^^^^^^^^^^^^^^^^^^^ link.text.org
+#^^^^^^^^^^^^^^^^^^^^^^^ markup.underline.link.text.org
 
 - some text [[link]] [[link_address][text]]
-#             ^^^^ reference.link.text.org
-#                      ^^^^^^^^^^^^ reference.link.text.org
-#                                    ^^^^ text.link.text.org
+#             ^^^^ markup.underline.link.text.org
+#                                    ^^^^ markup.underline.link.text.org
 # ^^^^^^^^^ entry.list.text.org
 
 [[broken link]

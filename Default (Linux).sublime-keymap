@@ -102,7 +102,7 @@
             {
                 "key": "selector",
                 "operator": "equal",
-                "operand": "reference.link.text.org | text.link.text.org"
+                "operand": "link.text.org"
             },
             {
                 "key": "preceding_text",
