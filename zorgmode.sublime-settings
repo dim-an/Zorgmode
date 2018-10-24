@@ -1,6 +1,7 @@
 // These settings override both User and Default settings for the zorgmode syntax
 {
-	"color_scheme": "Packages/zorgmode/Color Scheme/orgmode.tmTheme",
+	//"color_scheme": "Packages/zorgmode/Color Scheme/orgmode.tmTheme",
+	"color_scheme": "Packages/zorgmode/Color Scheme/orgmode.sublime-color-scheme",
 
 	"link_transform_rules": [
 		{
