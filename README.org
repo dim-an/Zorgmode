@@ -32,39 +32,42 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 | zorg_archive                   | ctrl+shift+A    | - headline           | move current section into archive             |
 
 * Org syntax crash course
-: org is a markup language similar to markdown or reStructuredText.
-: 
-: * Headlines (<- this is example of level 1 headline)
-: Line that starts with one or more stars is a headline.
-: ** Example of level 2 headline
-: *** Example of level 3 headline
-: ** Headline level 2 again
-: 
-: * Lists
-: org has various kinds of lists. You can use `-' `+' `*' to make an unoredered list.
-: List items can span multiple lines.
-:  - item1
-:    continuation of item1 must be properly indented
-:  - item2
-: 	and item2 has sublist
-: 	* child1
-: 	* child2
-: 
-: Ordered lists can be created using numeral that is follwed by either '.' or ')'.
-:  1. First item.
-:  2. Second item.
-: 
-: * Links
-:  - [[http://github.com/][GitHub]] <- this is a link
-:  - [[http://github.com/]] <- this is also a link
-:  - http://github.com/ <- this is yet another link
-: 
-: * Projects and checkbox item
-: Headline that starts with TODO / DONE is a project, like this
-: ** TODO Explain projects and checkboxes
-: List item that starts with [ ] / [X] is a checkbox list item
-:  - [ ] unchecked list item
-:  - [X] checked list item    
+
+#+BEGIN_SRC
+org is a markup language similar to markdown or reStructuredText.
+
+* Headlines (<- this is example of level 1 headline)
+Line that starts with one or more stars is a headline.
+** Example of level 2 headline
+*** Example of level 3 headline
+** Headline level 2 again
+
+* Lists
+org has various kinds of lists. You can use `-' `+' `*' to make an unoredered list.
+List items can span multiple lines.
+ - item1
+   continuation of item1 must be properly indented
+ - item2
+	and item2 has sublist
+	* child1
+	* child2
+
+Ordered lists can be created using numeral that is follwed by either '.' or ')'.
+ 1. First item.
+ 2. Second item.
+
+* Links
+ - [[http://github.com/][GitHub]] <- this is a link
+ - [[http://github.com/]] <- this is also a link
+ - http://github.com/ <- this is yet another link
+
+* Projects and checkbox item
+Headline that starts with TODO / DONE is a project, like this
+** TODO Explain projects and checkboxes
+List item that starts with [ ] / [X] is a checkbox list item
+ - [ ] unchecked list item
+ - [X] checked list item    
+#+END_SRC
 
 * Features
 Currently zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
