@@ -33,13 +33,13 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 
 * Org syntax crash course
 : org is a markup language similar to markdown or reStructuredText.
-:
+: 
 : * Headlines (<- this is example of level 1 headline)
 : Line that starts with one or more stars is a headline.
 : ** Example of level 2 headline
 : *** Example of level 3 headline
 : ** Headline level 2 again
-:
+: 
 : * Lists
 : org has various kinds of lists. You can use `-' `+' `*' to make an unoredered list.
 : List items can span multiple lines.
@@ -49,7 +49,7 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 : 	and item2 has sublist
 : 	* child1
 : 	* child2
-:
+: 
 : Ordered lists can be created using numeral that is follwed by either '.' or ')'.
 :  1. First item.
 :  2. Second item.
@@ -58,7 +58,7 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 :  - [[http://github.com/][GitHub]] <- this is a link
 :  - [[http://github.com/]] <- this is also a link
 :  - http://github.com/ <- this is yet another link
-:
+: 
 : * Projects and checkbox item
 : Headline that starts with TODO / DONE is a project, like this
 : ** TODO Explain projects and checkboxes
