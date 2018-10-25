@@ -48,9 +48,9 @@ List items can span multiple lines.
  - item1
    continuation of item1 must be properly indented
  - item2
-	and item2 has sublist
-	* child1
-	* child2
+    and item2 has sublist:
+    * child1
+    * child2
 
 Ordered lists can be created using numeral that is follwed by either '.' or ')'.
  1. First item.
