@@ -61,7 +61,7 @@
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
-                "operand": "org.text.list.entry"
+                "operand": "entry.list.text.org"
         }]
     },
     {
