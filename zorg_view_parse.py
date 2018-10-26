@@ -11,6 +11,7 @@ LIST_ENTRY_BEGIN_RE = re.compile(r"^(\s+[*]|\s*[-+]|\s*[0-9]+[.]|\s[a-zA-Z][.])\
 def is_point_within_region(point, region):
     return region.a <= point < region.b
 
+
 def find_child_containing_point(node, point):
     if not is_point_within_region(point, node.region):
         return None
@@ -61,13 +62,14 @@ class OrgViewNode(object):
         if indent is None:
             indent = 0
         indent_str = " " * indent
-        print(indent_str + repr(self), file=None)
+        print(indent_str + repr(self), file=file)
         for c in self.children:
             c.debug_print(indent+2)
 
 
 class OrgRoot(OrgViewNode):
     node_type = "root"
+
     def __init__(self, view):
         super(OrgRoot, self).__init__(view, None)
 
@@ -78,6 +80,7 @@ class OrgSection(OrgViewNode):
 
 class OrgList(OrgViewNode):
     node_type = "list"
+
     def __init__(self, view, parent, indent):
         super(OrgList, self).__init__(view, parent)
         self.indent = indent
@@ -85,6 +88,7 @@ class OrgList(OrgViewNode):
 
 class OrgListEntry(OrgViewNode):
     node_type = "list_entry"
+
     def __init__(self, view, parent, indent):
         super(OrgListEntry, self).__init__(view, parent)
         self.indent = indent
@@ -225,37 +229,6 @@ if __name__ == '__main__':
             self.assertEqual(len(result.children[0].children[0].children), 1)
             self.assertEqual(_node_text(result.children[0].children[0].children[0]), "   - child")
             self.assertEqual(_node_text(result.children[0].children[1]), " - parent 2")
-
-        def test_simple_list_with_child(self):
-            view = mock_sublime.View(
-                " - parent 1\n"
-                "   - child\n"
-                " - parent 2\n"
-            )
-
-            parser = OrgListParser(view)
-            for region in view.sp_iter_all_line_regions():
-                result = parser.try_push_line(region)
-                self.assertTrue(result)
-            result = parser.finish()
-            self.assertEqual(len(result.children), 1)
-            self.assertEqual(len(result.children[0].children), 2)
-            self.assertEqual(_node_text(result.children[0].children[0]), " - parent 1\n   - child")
-            self.assertEqual(len(result.children[0].children[0].children), 1)
-            self.assertEqual(_node_text(result.children[0].children[0].children[0]), "   - child")
-            self.assertEqual(_node_text(result.children[0].children[1]), " - parent 2")
-
-        def test_list_with_text(self):
-            view = mock_sublime.View(
-                " - parent 1\n"
-                "  1111\n"
-                "  *- child 1\n"
-            )
-
-            parser = OrgListParser(view)
-            for region in view.sp_iter_all_line_regions():
-                result = parser.try_push_line(region)
-                self.assertTrue(result)
 
         def test_list_with_text(self):
             view = mock_sublime.View(
