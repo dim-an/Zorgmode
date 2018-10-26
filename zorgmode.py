@@ -30,18 +30,21 @@ MAX_HEADLINE_LEVEL = 30
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
-URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+
 
 class ZorgmodeError(RuntimeError):
     pass
+
 
 if history_list_plugin:
     def save_position_for_jump_history(view):
         jump_history = history_list_plugin.get_jump_history_for_view(view)
         jump_history.push_selection(view)
 else:
-    def save_position_for_jump_history(view):
+    def save_position_for_jump_history(_):
         pass
+
 
 def goto(view, point):
     save_position_for_jump_history(view)
@@ -49,8 +52,10 @@ def goto(view, point):
     view.sel().add(sublime.Region(point))
     view.show(point)
 
+
 def zorg_parse_document(view):
     return zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
+
 
 def find_links_in_string(text):
     processed_end = 0
@@ -130,7 +135,7 @@ class OrgmodeStructure(object):
             # We want our regions to include trailing '\n'
             if region.b != view_size:
                 region.b += 1
-            
+
         current_line_index, _ = view.rowcol(self.get_cursor_point())
 
         # 2. Нужно идти назад пока не будем уверены, что списка дальше нет.
@@ -165,8 +170,8 @@ class OrgmodeStructure(object):
         parser = OrgListParser(view)
         line_idx = org_list_start
         while (
-            line_idx < len(line_region_list)
-            and parser.try_push_line(line_region_list[line_idx])
+                line_idx < len(line_region_list)
+                and parser.try_push_line(line_region_list[line_idx])
         ):
             line_idx += 1
         return parser.finish()
@@ -214,8 +219,9 @@ class OrgmodeStructure(object):
         for match in re.finditer(regexp, text, flags=re.MULTILINE):
             yield match.group(1)
 
+
 def cycle_todo_state(view, edit, forward=True):
-    STATUS_LIST = ['', 'TODO', 'DONE']
+    status_list = ['', 'TODO', 'DONE']
     if len(view.sel()) != 1:
         return
     sel, = view.sel()
@@ -224,27 +230,26 @@ def cycle_todo_state(view, edit, forward=True):
 
     # - получить строку в которой мы находимся
     current_line_region = view.line(sel)
-    current_line_index,_ = view.rowcol(current_line_region.a)
+    current_line_index, _ = view.rowcol(current_line_region.a)
     current_line = view.substr(current_line_region)
     match = re.search(r'^\s*(([-+*]|[*]+)\s)(\s*\w+\b\s*|\s*)?', current_line)
     if match is None:
         return
 
     # - понять какой таг у нас стоит и где
-    spaced_status = ''
     status_start = match.end(1)
     spaced_status = match.group(3)
     status_end = match.end(3)
 
     # - понять какой таг у нас следующий
     try:
-        status_index = STATUS_LIST.index(spaced_status.strip())
+        status_index = status_list.index(spaced_status.strip())
     except ValueError:
         status_index = 0
         status_end = status_start
 
     delta = 1 if forward else -1
-    next_status = STATUS_LIST[(status_index + delta) % len(STATUS_LIST)]
+    next_status = status_list[(status_index + delta) % len(status_list)]
 
     status_region = sublime.Region(
         view.text_point(current_line_index, status_start),
@@ -254,32 +259,37 @@ def cycle_todo_state(view, edit, forward=True):
         next_status += ' '
     view.replace(edit, status_region, next_status)
 
+
 class ZorgCycleTodoStateForward(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=True)
+
 
 class ZorgCycleTodoStateBackward(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=False)
 
+
 def is_straight_region(region_to_fold):
     return region_to_fold.a < region_to_fold.b
 
-def find_all_in_region(view, expr, region, *flags):
-    INVALID_REGION = sublime.Region(-1, -1)
+
+def find_all_in_region(view, expr, region):
+    invalid_region = sublime.Region(-1, -1)
     result = []
     pos = region.a
     while True:
         match_region = view.find(expr, pos)
-        if match_region == INVALID_REGION:
+        if match_region == invalid_region:
             break
         if not region.contains(match_region):
             break
-        if match_region.a <= pos and pos != region.a:
+        if match_region.a <= pos != region.a:
             break
         result.append(match_region)
         pos = match_region.b
     return result
+
 
 class ZorgCycle(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -292,7 +302,7 @@ class ZorgCycle(sublime_plugin.TextCommand):
 
         # - получить строку в которой мы находимся
         current_line_region = view.line(sel)
-        current_line_index,_ = view.rowcol(current_line_region.a)
+        current_line_index, _ = view.rowcol(current_line_region.a)
         current_line = view.substr(current_line_region)
 
         # убедиться, что это headline
@@ -309,21 +319,26 @@ class ZorgCycle(sublime_plugin.TextCommand):
             return
         if not is_straight_region(region_to_fold):
             region_to_fold = sublime.Region(current_line_region.b, view.size())
-
-        # свернуть 
+        # свернуть
         folded = view.fold(region_to_fold)
         if not folded:
             view.unfold(region_to_fold)
+
 
 def find_all_headers(view, min_level=1, max_level=1000):
     whole_file_region = sublime.Region(0, view.size())
     return find_all_in_region(view, "^[*]{{{},{}}}\s[^\n]*$".format(min_level, max_level), whole_file_region)
 
+
 def get_header_level(string):
-    for i,c in enumerate(string):
+    if not string:
+        raise ValueError("string is not a headline")
+    i = None
+    for i, c in enumerate(string):
         if c != '*':
             break
     return i
+
 
 def get_folding_for_headers(view, header_region_list):
     prev_header_end = None
@@ -337,11 +352,14 @@ def get_folding_for_headers(view, header_region_list):
         prev_header_end = header_region.b
     return result
 
+
 def is_line_start(view, point):
     return bool(view.classify(point) & sublime.CLASS_LINE_START)
 
+
 def strictly_within(region1, region2):
     return region2.a < region1.a <= region1.b < region2.b
+
 
 def project_point_after_swapping(region1, region2, point):
     # NOTE: there is a tricky case when region1.b == region2.a
@@ -367,6 +385,7 @@ def project_point_after_swapping(region1, region2, point):
         return point + region1.size() - region2.size()
     else:
         return point
+
 
 def swap_regions(view, edit, region1, region2):
     if len(view.sel()) != 1 or not view.sel()[0].empty():
@@ -447,7 +466,7 @@ def move_current_list_entry(view, edit, up=True):
 def move_current_section(view, edit, up=True):
     if len(view.sel()) != 1 or not view.sel()[0].empty():
         return
-    
+
     orgmode_structure = OrgmodeStructure(view)
     # Найти текущую ноду
     current_section_info = orgmode_structure.get_section_info()
@@ -463,7 +482,6 @@ def move_current_section(view, edit, up=True):
         swap_headline_index = current_headline_index - 1
     else:
         swap_headline_index = current_headline_index + 1
-
 
     if swap_headline_index < 0 or swap_headline_index >= len(all_headlines):
         return
@@ -556,6 +574,7 @@ class ZorgToggleCheckbox(sublime_plugin.TextCommand):
         next_tick = {' ': 'X', 'X': ' '}.get(tick_mark, ' ')
         view.replace(edit, tick_region, next_tick)
 
+
 class ZorgMoveToArchive(sublime_plugin.TextCommand):
     def run(self, edit, silent=True):
         view = self.view
@@ -572,8 +591,6 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
             archive_filename = archive_template.replace('%s', current_filename)
         else:
             archive_filename = archive_template
-
-        # TODO: use parsed structure
 
         # Найти текущую секцию
         orgmode_structure = OrgmodeStructure(view)
@@ -603,6 +620,7 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
         view.erase(edit, section_info.section_region)
         sublime.status_message("Entry is archived to `{}'".format(archive_filename))
         return
+
 
 class ZorgFollowLink(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -641,10 +659,12 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         else:
             self.follow_header_link(view, url)
 
-    def open_in_browser(self, view, url):
+    @staticmethod
+    def open_in_browser(_, url):
         webbrowser.open_new(url)
 
-    def expand_url(self, orgmode_structure, url):
+    @staticmethod
+    def expand_url(orgmode_structure, url):
         original_url = url
 
         expansion_rules = {}
@@ -670,19 +690,22 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         else:
             raise RuntimeError("Expansion limit exceeded, while expanding url: {}".format(original_url))
 
-    def open_file(self, view, url):
-        file_path = url.split(':', 1)[-1] # strip scheme
+    @staticmethod
+    def open_file(view, url):
+        file_path = url.split(':', 1)[-1]  # strip scheme
         file_path = os.path.expanduser(file_path)
         window = view.window()
         window.open_file(file_path)
 
-    def open_sys_file(self, view, url):
-        file_path = url.split(':', 1)[-1] # strip scheme
+    @staticmethod
+    def open_sys_file(_, url):
+        file_path = url.split(':', 1)[-1]  # strip scheme
         file_path = os.path.expanduser(file_path)
         # TODO: нужно сделать для других типов файлов
         subprocess.check_call(['xdg-open', file_path])
 
-    def follow_header_link(self, view, caption):
+    @staticmethod
+    def follow_header_link(view, caption):
         org_document = zorg_parse_document(view)
         offset = None
         for section in org_document.iter_section():
