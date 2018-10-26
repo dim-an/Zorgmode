@@ -82,8 +82,9 @@ When cursor is over headline =zorg_cycle= (Linux: =Tab=) folds/unfolds correspon
 
 ** Hyperlinks
 You can insert links in your document. Link can be in one of two forms:
-  1. =[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]=
+  1. =https://github.com/dim-an/zorgmode=
   2. =[[https://github.com/dim-an/zorgmode]]=)
+  3. =[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]=
 
 To follow a link you should place cursor over it use =zorg_follow_link= (Linux: =Enter=).
 There are multiple types of links some of them will be opened using external application and others will be opened inside SublimeText.
@@ -93,20 +94,20 @@ For the latter ones you can use default SublimeText3 commands =Jump Back= / =Jum
 Zorgmode supports multiple types of links:
   1. Web links =[[http://github.com/]]=. Zorgmode will open them in your default web browser.
   2. File =[[file:/etc/passwd]]=. Zorgmode will open them using SublimeText.
-  3. Files or directories =[[file+sys:/etc/]]=. Zorgmode will open them using your system default application (e.g. file manager for directories / media player for videos).
+  3. Files or directories =[[file+sys:/etc/]]=. Zorgmode will open them using your system default application (e.g. file manager for directories or media player for videos).
   4. Sections =[[Short command overview]]=. Zorgmode will set cursor to corresponding section.
 
 *** Link abbreviations
-You can create per document link abbreviations. In order to do this you should place special line for example
+You can create per document link abbreviations. To do this you should insert special line in any place of your document
 : #+LINK: gh-user https://github.com/%s
-Once you do this you can create links like this =[[gh-user:torvalds]]=. That link will be interpeted by zorgmode as =[[https://github.com/torvalds]]=.
+Once line is inserted you can create links like this =[[gh-user:torvalds]]=. That link will be interpeted by zorgmode as =[[https://github.com/torvalds]]=.
 
 ** Structural editing
-=zorg_move_node_up= (Linux: =Alt+Up=) and =zorg_move_node_down= (Linux: =Alt+Down=) allows to swap current section (or list item) with its sibling.
+=zorg_move_node_up= (Linux: =Alt+Up=) and =zorg_move_node_down= (Linux: =Alt+Down=) allows to swap current section or list item with its sibling.
 Cursor must be positioned on the section headline or first line of list item.
 
 ** Todos and checkboxes
-Headlines that starts with =TODO= or =DONE= keyword are projects
+Headlines that start with =TODO= or =DONE= keyword are projects.
 : * TODO Write documentation
 : ** DONE Explain org syntax
 : ** TODO Explain all the commands
@@ -122,4 +123,4 @@ Once you are done with your project you can move it to archive using =zorg_move_
 [[https://packagecontrol.io/packages/Table%20Editor][SublimeTableEditor]] plugin can help you edit tables in your org files.
 
 * Other implementations
-There is [[https://github.com/danielmagnussons/orgmode][another implementation]] of orgmode for sublime.
+There is [[https://github.com/danielmagnussons/orgmode][another implementation]] of orgmode for SublimeText.
