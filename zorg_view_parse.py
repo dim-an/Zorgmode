@@ -6,10 +6,18 @@ import re
 # NOTE: this module doesn't import sublime module so we can mock view/region etc in tests
 
 LIST_ENTRY_BEGIN_RE = re.compile(r"^(\s+[*]|\s*[-+]|\s*[0-9]+[.]|\s[a-zA-Z][.])\s+")
+HEADLINE_RE = re.compile("^([*]+)\s[^\n]*$")
 
 
 def is_point_within_region(point, region):
     return region.a <= point < region.b
+
+
+def iter_tree_depth_first(node):
+    for child in node.children:
+        for n in iter_tree_depth_first(child):
+            yield n
+    yield node
 
 
 def find_child_containing_point(node, point):
@@ -55,6 +63,9 @@ class OrgViewNode(object):
         self.region = None
         self.view = view
 
+    def text(self):
+        return self.view.substr(self.region)
+
     def __repr__(self):
         return "{cls}({str_repr})".format(cls=type(self).__name__, str_repr=repr(_node_text(self)))
 
@@ -77,6 +88,18 @@ class OrgRoot(OrgViewNode):
 class OrgSection(OrgViewNode):
     node_type = "section"
 
+    def __init__(self, view, parent, level):
+        super(OrgSection, self).__init__(view, parent)
+        self.level = level
+
+
+class OrgHeadline(OrgViewNode):
+    node_type = "headline"
+
+    def __init__(self, view, parent, level):
+        super(OrgHeadline, self).__init__(view, parent)
+        self.level = level
+
 
 class OrgList(OrgViewNode):
     node_type = "list"
@@ -92,6 +115,38 @@ class OrgListEntry(OrgViewNode):
     def __init__(self, view, parent, indent):
         super(OrgListEntry, self).__init__(view, parent)
         self.indent = indent
+
+
+class OrgViewParser(object):
+    def __init__(self, view):
+        self._result = OrgSection(view, None, 0)
+        self._stack = [self._result]
+        self._view = view
+
+    def try_push_line(self, region):
+        line = self._view.substr(region)
+        m = HEADLINE_RE.match(line)
+        if m is None:
+            _extend_region(self._stack[-1], region)
+            return True
+
+        headline_level = len(m.group(1))
+        assert headline_level > 0
+        while (
+            not isinstance(self._stack[-1], OrgSection)
+            or self._stack[-1].level >= headline_level
+        ):
+            self._stack.pop()
+
+        new_section = OrgSection(self._view, self._stack[-1], headline_level)
+        headline = OrgHeadline(self._view, new_section, headline_level)
+        self._stack.append(new_section)
+        _extend_region(headline, region)
+        return True
+
+    def finish(self):
+        self._stack = None
+        return self._result
 
 
 class OrgListParser(object):
@@ -110,7 +165,6 @@ class OrgListParser(object):
         line_is_empty = not bool(line.strip())
         if line_is_empty:
             self._empty_lines += 1
-            print(line, self._empty_lines)
             return bool(self._empty_lines < 2)
         else:
             self._empty_lines = 0
@@ -155,7 +209,6 @@ class OrgListParser(object):
     
     def finish(self):
         self._stack = None
-        self._result.debug_print()
         return self._result
 
 
@@ -269,7 +322,5 @@ if __name__ == '__main__':
                 self.assertEqual(len(child_lst.children), 1)
                 child_entry, = child_lst.children
                 self.assertEqual(_node_text(child_entry), "  * child {}".format(num))
-
-    unittest.main()
 
     unittest.main()

@@ -6,6 +6,7 @@ name: zorgmode
 
 contexts:
     main:
+        - include: expect_agenda
         - include: expect_headline
         - include: expect_list_entry
         - include: expect_link
@@ -32,7 +33,6 @@ contexts:
           push: headline4
         - match: '^[*]{5}[*]*\s'
           push: headline5p
-
 
     headline1:
         - meta_scope: heading.1.text.org
@@ -65,11 +65,7 @@ contexts:
           pop: true
 
     expect_link:
-        - include: expect_link_no_description
-        - include: expect_link_with_description
-        - include: expect_link_url_like
-    
-    expect_link_no_description:
+        # Links like [[http://github.com/]]
         - match: |-
             (?x:
               \[\[
@@ -82,7 +78,7 @@ contexts:
             0: link.text.org
             1: markup.underline.link.text.org
 
-    expect_link_with_description:
+        # Links like [[http://github.com/][GitHub]]
         - match: |-
             (?x:
               \[\[
@@ -99,12 +95,34 @@ contexts:
             0: link.text.org
             1: markup.underline.link.text.org
 
-    expect_link_url_like:
-      # Honestly copypasted from http://urlregex.com/
-      - match: '(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)'
-        captures:
-          0: link.text.org
-          1: markup.underline.link.text.org
+        # Emplaced URLs
+        # Honestly copypasted from http://urlregex.com/
+        - match: '(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)'
+          captures:
+            0: link.text.org
+            1: markup.underline.link.text.org
+
     expect_special_line:
         - match: '^#\+[A-Z_]+:.*$'
           scope: special_line.text.org
+
+    expect_agenda:
+        - match: '^#\+BEGIN_AGENDA'
+          scope: special_line
+          push: inside_agenda
+
+    inside_agenda:
+        - match: '^\s*TODO:'
+          push: inside_agenda_item
+        - match: '#\+WARNING: .*$'
+          scope: warning.agenda.text.org
+        - include: expect_link
+        - match: '^#\+END_AGENDA$'
+          scope: special_line
+          pop: true
+
+    inside_agenda_item:
+      - meta_scope: item.agenda.text.org
+      - include: expect_link
+      - match: '$'
+        pop: true

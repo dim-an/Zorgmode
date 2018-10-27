@@ -24,27 +24,27 @@
     [
         {
             "name": "Zorgmode Headline 1",
-            "scope": "heading.1",
+            "scope": "heading.1 | markup.heading.1",
             "foreground": "#7AA026",
         },
         {
             "name": "Zorgmode Headline 2",
-            "scope": "heading.2",
+            "scope": "heading.2 | markup.heading.2",
             "foreground": "#CA8689",
         },
 		{
             "name": "Zorgmode Headline 3",
-            "scope": "heading.3",
+            "scope": "heading.3 | markup.heading.3",
             "foreground": "#EFBD2D",
         },
         {
             "name": "Zorgmode Headline 4",
-            "scope": "heading.4",
+            "scope": "heading.4 | markup.heading.4",
             "foreground": "#549298",
         },
 		{
             "name": "Zorgmode Headline 5p",
-            "scope": "heading.5p",
+            "scope": "heading.5p | markup.heading.5p",
             "foreground": "#7B6F62",
         },
         {
@@ -63,6 +63,12 @@
 			"name": "Zorgmode Control Line",
             "scope": "special_line",
             "foreground": "#6E6E6E",
+        },
+        {
+            "name": "Zorgmode Agenda Warning",
+            "scope": "warning.agenda",
+            "foreground": "#E0E070",
+            "font_style": "italic"
         }
     ]
 }

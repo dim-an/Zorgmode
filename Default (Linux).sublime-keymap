@@ -115,5 +115,17 @@
                 "operand": "^\\[\\["
             },
         ]
-    }
+    },
+    {
+        "keys": ["f5"],
+        "command": "zorg_todo_list",
+    },
+    {
+        "keys": ["tab"],
+        "command": "zorg_agenda_goto",
+        "context": [{
+                "key": "selector",
+                "operand": "item.agenda.text.org"
+        }]
+    },
 ]

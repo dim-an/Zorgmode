@@ -14,8 +14,11 @@ from . import zorg_parse
 from .zorg_view_parse import (
     LIST_ENTRY_BEGIN_RE,
 
+    OrgHeadline,
+    OrgViewParser,
     OrgListParser,
 
+    iter_tree_depth_first,
     find_child_containing_point,
     next_sibling,
     prev_sibling
@@ -46,7 +49,7 @@ else:
         pass
 
 
-def goto(view, point):
+def goto(view: sublime.View, point):
     save_position_for_jump_history(view)
     view.sel().clear()
     view.sel().add(sublime.Region(point))
@@ -95,6 +98,17 @@ def find_links_in_string(text):
     return link_list
 
 
+def view_get_cursor_point(view):
+    if len(view.sel()) == 0:
+        raise ZorgmodeError("Cannot run this command with no cursor")
+    if len(view.sel()) > 1:
+        raise ZorgmodeError("Cannot run this command with multiple cursors")
+    sel, = view.sel()
+    if not sel.empty():
+        raise ZorgmodeError("Cannot run this command with selection")
+    return sel.a
+
+
 class OrgmodeStructure(object):
     SectionInfo = collections.namedtuple(
         'SectionInfo',
@@ -110,13 +124,7 @@ class OrgmodeStructure(object):
         return LIST_ENTRY_BEGIN_RE.match(current_line)
 
     def get_cursor_point(self):
-        view = self.view
-        if len(view.sel()) != 1:
-            return None
-        sel, = view.sel()
-        if not sel.empty():
-            return None
-        return sel.a
+        return view_get_cursor_point(self.view)
 
     def get_line_region(self, point=None):
         view = self.view
@@ -719,7 +727,193 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         goto(view, offset)
 
 
-class ZorgCycleListState(object):
+class Agenda(object):
+    AgendaLine = collections.namedtuple("AgendaLine", ["text", "meta_info"])
+    AgendaItemMetaInfo = collections.namedtuple("AgendaItemMetaInfo", [
+        "file_name",
+        "view_id",
+        "line_index_0",
+        "original_text",
+    ])
+
+    def __init__(self):
+        self._lines = []
+        self._add_line("#+BEGIN_AGENDA", None)
+
+    def _add_line(self, text, meta_info):
+        if "\n" in text:
+            raise ValueError("It's not a single line")
+        self._lines.append(self.AgendaLine(text, meta_info))
+
+    def get_line_meta_info(self, line_index_0: int) -> AgendaItemMetaInfo:
+        return self._lines[line_index_0].meta_info
+
+    def add_missing_config_warning(self):
+        # TODO: proper warning
+        self._add_line("#+WARNING: agenda_configuration is not found", None)
+
+    def add_todo_item(self, headline_node):
+        view = headline_node.view
+        region = headline_node.region
+        original_text = headline_node.view.substr(region)
+        _, stripped_text = original_text.split(None, 1)
+        stripped_text = stripped_text.rstrip("\n")
+
+        row, _ = view.rowcol(region.a)
+        meta_info = self.AgendaItemMetaInfo(
+            file_name=view.file_name(),
+            view_id=view.id(),
+            line_index_0=row,
+            original_text=original_text,
+        )
+        self._add_line("  TODO:    " + stripped_text, meta_info)
+
+    def finalize(self):
+        self._add_line("#+END_AGENDA", None)
+        iter_lines = (line.text for line in self._lines)
+        return "\n".join(iter_lines) + "\n"
+
+
+class AgendaRegistry:
+    def __init__(self):
+        self._agenda_registry = {}
+
+    def save_agenda(self, view, agenda):
+        self._run_gc()
+        self._agenda_registry[view.id()] = agenda
+
+    def get_agenda(self, view) -> Agenda:
+        return self._agenda_registry.get(view.id(), None)
+
+    def _run_gc(self):
+        active_view_ids = set()
+        for window in sublime.windows():
+            for view in window.views():
+                active_view_ids.add(view.id())
+        for_gc = []
+        for id_ in self._agenda_registry:
+            if id_ not in active_view_ids:
+                for_gc.append(id_)
+
+        for id_ in for_gc:
+            del self._agenda_registry[id_]
+
+
+AGENDA_REGISTRY = AgendaRegistry()
+
+
+def get_zorgmode_syntax():
+    lst = sublime.find_resources("zorgmode.sublime-syntax")
+    if not lst:
+        return None
+    return lst[0]
+
+
+class ZorgTodoList(sublime_plugin.TextCommand):
     def run(self, edit):
-        orgmode_structure = OrgmodeStructure(self.view)
-        org_list_node = orgmode_structure.parse_current_org_list()
+        view = self.view
+
+        zorg_syntax = get_zorgmode_syntax()
+        if zorg_syntax is None:
+            sublime.status_message("Cannot find zorgmode syntax file. Probably zorgmode is not installed correctly")
+            return
+
+        window = view.window()
+
+        agenda_output = Agenda()
+        agenda_output.add_missing_config_warning()
+
+        # TODO: Загрузить список файлов для загрузки из конфигурации
+
+        # TODO: factorize
+        # 1. Нужно получить список строк исходного файла.
+        view_size = view.size()
+        line_region_list = view.lines(sublime.Region(0, view_size))
+        for region in line_region_list:
+            # We want our regions to include trailing '\n'
+            if region.b != view_size:
+                region.b += 1
+
+        view_parse = OrgViewParser(view)
+        for region in line_region_list:
+            res = view_parse.try_push_line(region)
+            assert res, repr(res)
+        org_section = view_parse.finish()
+
+        for headline in iter_tree_depth_first(org_section):
+            if not isinstance(headline, OrgHeadline):
+                continue
+            text = headline.text().rstrip('\n')
+            m = re.match("^[*]+\s(TODO\s.*)$", text)
+            if m:
+                agenda_output.add_todo_item(headline)
+
+        agenda_view = window.find_output_panel("output.agenda")
+        if agenda_view is not None:
+            window.destroy_output_panel("output.agenda")
+        agenda_view = window.create_output_panel("agenda")
+        agenda_view.set_syntax_file(zorg_syntax)
+        agenda_view.run_command("append", {"characters": agenda_output.finalize(), "force": True})
+        agenda_view.set_read_only(True)
+        AGENDA_REGISTRY.save_agenda(agenda_view, agenda_output)
+        window.run_command("show_panel", {"panel": "output.agenda"})
+        window.focus_view(agenda_view)
+
+
+def agenda_meta_info_get_or_create_view(window: sublime.Window, meta_info: Agenda.AgendaItemMetaInfo):
+    if meta_info.file_name is not None:
+        view = window.find_open_file(meta_info.file_name)
+        if view is not None:
+            return view
+        return window.open_file(meta_info.file_name)
+
+    for view in window.views():
+        if view.id() == meta_info.view_id:
+            return view
+
+    raise ZorgmodeError("Cannot find file for this item")
+
+
+class ZorgAgendaGoto(sublime_plugin.TextCommand):
+    def run(self, edit):
+        try:
+            agenda_view = self.view
+            window = agenda_view.window()
+            agenda = AGENDA_REGISTRY.get_agenda(agenda_view)
+
+            # 1. Получить номер текущей строки.
+            agenda_line_index_0, _ = agenda_view.rowcol(view_get_cursor_point(agenda_view))
+
+            # 2. Получить meta_info
+            meta_info = agenda.get_line_meta_info(agenda_line_index_0)
+
+            # 3. По meta_info надо найти подходящий view и активировать его.
+            file_view = agenda_meta_info_get_or_create_view(window, meta_info)
+
+            match_list = file_view.find_all(meta_info.original_text, sublime.LITERAL)
+
+            # 4. Найти нужную позицию во view,
+            best_region = None
+            best_distance = None
+
+            for m in match_list:
+                cur_line_index_0, _ = file_view.rowcol(m.a)
+                cur_distance = abs(cur_line_index_0 - meta_info.line_index_0)
+                if (
+                        best_region is None
+                        or best_distance > cur_distance
+                ):
+                    best_region = m
+                    best_distance = cur_distance
+
+            if best_region is None:
+                raise ZorgmodeError("Cannot find this item anymore")
+
+            # Перейти на начало соответствующей строки
+            group_idx, _ = window.get_view_index(file_view)
+            window.focus_group(group_idx)
+
+            goto(file_view, best_region.a)
+
+        except ZorgmodeError as e:
+            sublime.status_message(str(e))
