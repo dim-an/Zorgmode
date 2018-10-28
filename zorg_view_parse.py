@@ -6,7 +6,13 @@ import re
 # NOTE: this module doesn't import sublime module so we can mock view/region etc in tests
 
 LIST_ENTRY_BEGIN_RE = re.compile(r"^(\s+[*]|\s*[-+]|\s*[0-9]+[.]|\s[a-zA-Z][.])\s+")
-HEADLINE_RE = re.compile("^([*]+)\s[^\n]*$")
+HEADLINE_RE = re.compile(
+    '^([*]+)\s+'  # STARS group 1
+    '(?:([A-Za-z0-9]+)\s+ )?' # KEYWORD group 2
+    '(?:\[[#]([a-zA-Z])\]\s+)?' # PRIORITY group 3
+    '(.*?)' # TITLE -- match in nongreedy fashion group 4
+    '\s*(:(?: [a-zA-Z0-9_@#]+:)+)?\s*$', # TAGS group 5
+)
 
 
 def is_point_within_region(point, region):
