@@ -161,6 +161,17 @@ def org_headline_get_text(headline: OrgHeadline):
     return line[title_begin:title_end]
 
 
+def org_headline_get_tag_list(headline: OrgHeadline):
+    line = headline.view.substr(headline.region)
+    m = HEADLINE_RE.match(line)
+    assert m is not None
+
+    tag_group = m.group(5)
+    if tag_group is not None:
+        return tag_group.strip(':').split(':')
+    return []
+
+
 class OrgList(OrgViewNode):
     node_type = "list"
 
@@ -415,26 +426,28 @@ if __name__ == '__main__':
                 "**** TODO [#b] headline 4\n"
                 "** UNDONE HEADLINE 5\n"
                 "** UNDONE [#a] HeAdLiNe 6\n"
+                "*** more headlines 7 :tag1:tag2:\n"
             )
 
             root = parse_org_document(view, mock_sublime.Region(0, view.size()))
 
-            all_headlines = []
+            headline_item_list = []
             for item in iter_tree_depth_first(root):
                 if isinstance(item, OrgHeadline):
-                    all_headlines.append(item)
+                    headline_item_list.append((
+                        org_headline_get_text(item),
+                        item.level,
+                        org_headline_get_tag_list(item)
+                    ))
 
-            headline_text_list = [
-                org_headline_get_text(h)
-                for h in all_headlines
-            ]
-            self.assertEqual(headline_text_list, [
-                "This is org headline",
-                "headline 2",
-                "headline 3",
-                "headline 4",
-                "UNDONE HEADLINE 5",
-                "UNDONE [#a] HeAdLiNe 6",
+            self.assertEqual(headline_item_list, [
+                ("This is org headline", 1, []),
+                ("headline 2", 2, []),
+                ("headline 3", 3, []),
+                ("headline 4", 4, []),
+                ("UNDONE HEADLINE 5", 2, []),
+                ("UNDONE [#a] HeAdLiNe 6", 2, []),
+                ("more headlines 7", 3, ["tag1", "tag2"]),
             ])
 
         def test_control_line_parsing(self):

@@ -10,7 +10,6 @@ import webbrowser
 import sublime_plugin
 import sublime
 
-from . import zorg_parse
 from .zorg_view_parse import (
     LIST_ENTRY_BEGIN_RE,
 
@@ -63,10 +62,6 @@ def goto(view: sublime.View, point):
     view.sel().clear()
     view.sel().add(sublime.Region(point))
     view.show(point)
-
-
-def zorg_parse_document(view):
-    return zorg_parse.parse_org_string(view.substr(sublime.Region(0, view.size())))
 
 
 def find_links_in_string(text):
