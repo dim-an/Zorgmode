@@ -1,27 +1,9 @@
 {
-    "name": "Monokai Bright Orgmode",
-    "globals":
-    {
-        "background": "#272822",
-        "foreground": "#F8F8F2",
-        "caret": "#F8F8F0",
-        "invisibles": "#3B3A32",
-        "line_highlight": "#3E3D32",
-        "selection": "#9D550F",
-        "selection_foreground": "#fffff8",
-        "inactive_selection": "#bbbbbb",
-        "inactive_selection_foreground": "#222222",
-        "find_highlight": "#FFE792",
-        "find_highlight_foreground": "#000000",
-		"active_guide" : "#9D550FB0",
-		"brackets_foreground": "#F8F8F2A5",
-		"brackets_options": "underline",
-		"bracket_contents_foreground": "#F8F8F2A5",
-		"bracket_contents_options": "underline",
-		"tags_options": "strippled_underline"
+    "variables" : {
+        "active_link_yellow": "#E0E090",
+        "hidden_link_yellow": "#B0B070",
     },
-    "rules":
-    [
+    "rules": [
         {
             "name": "Zorgmode Headline 1",
             "scope": "heading.1 | markup.heading.1",
@@ -50,24 +32,23 @@
         {
             "name": "Zorgmode Link",
             "scope": "markup.underline.link",
-            "foreground": "#E0E090",
-            //"font_style": "italic"   	
+            "foreground": "var(active_link_yellow)",
+            "font_style": "italic",  	
         },
         {
             "name": "Zorgmode Link Hidden",
             "scope": "link.text.org",
-            //"foreground": "#6E6E6E",
-            "foreground": "#B0B070",
+            "foreground": "var(hidden_link_yellow)",
         },
         {
 			"name": "Zorgmode Control Line",
             "scope": "special_line",
-            "foreground": "#6E6E6E",
+            "foreground": "grey",
         },
         {
             "name": "Zorgmode Agenda Warning",
             "scope": "warning.agenda",
-            "foreground": "#E0E070",
+            "foreground": "var(yellow)",
             "font_style": "italic"
         }
     ]
