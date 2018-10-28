@@ -14,11 +14,15 @@ from . import zorg_parse
 from .zorg_view_parse import (
     LIST_ENTRY_BEGIN_RE,
 
+    OrgControlLine,
     OrgHeadline,
     OrgListParser,
+    OrgSection,
 
     find_child_containing_point,
+    org_control_line_get_key_value,
     org_headline_get_text,
+    is_point_within_region,
     iter_tree_depth_first,
     next_sibling,
     parse_org_document as parse_org_document_new,
@@ -35,6 +39,10 @@ MAX_HEADLINE_LEVEL = 30
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
 URL_RE = re.compile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+
+
+class ZorgmodeFatalError(RuntimeError):
+    pass
 
 
 class ZorgmodeError(RuntimeError):
@@ -585,33 +593,56 @@ class ZorgToggleCheckbox(sublime_plugin.TextCommand):
 
 
 class ZorgMoveToArchive(sublime_plugin.TextCommand):
-    def run(self, edit, silent=True):
+    def run(self, edit, silent=False):
+        try:
+            self.run_impl(edit)
+        except ZorgmodeError as e:
+            sublime.status_message(str(e))
+        except ZorgmodeFatalError as e:
+            if silent:
+                sublime.status_message(str(e))
+            else:
+                sublime.error_message(str(e))
+
+    def run_impl(self, edit):
         view = self.view
         current_filename = view.file_name()
-        document = zorg_parse_document(view)
-        archive_template = document.archive
+
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+
+        archive_template = None
+        cursor = view_get_cursor_point(view)
+        headline_under_cursor = None
+        for item in iter_tree_depth_first(org_root):
+            if isinstance(item, OrgControlLine):
+                key, value = org_control_line_get_key_value(item)
+                if key == "ARCHIVE":
+                    archive_template = value
+            elif isinstance(item, OrgHeadline):
+                if is_point_within_region(cursor, item.region):
+                    assert headline_under_cursor is None
+                    headline_under_cursor = item
+
         if archive_template is None:
             archive_template = '%s_archive'
 
         if '%s' in archive_template:
             if current_filename is None:
-                sublime.status_message("File doesn't have a name don't know where to put archive")
-                return
+                raise ZorgmodeError("Don't know where to put archive because file doesn't have a name")
             archive_filename = archive_template.replace('%s', current_filename)
         else:
             archive_filename = archive_template
 
-        # Найти текущую секцию
-        orgmode_structure = OrgmodeStructure(view)
-        section_info = orgmode_structure.get_section_info()
-
         # Привести её к уровню 1
-        section_text = view.substr(section_info.section_region)
-        if section_info.headline_level == 1:
+        # TODO: это упячечный способ приводить секцию к уровню 1 (из-за #+BEGIN_SRC)
+        section = headline_under_cursor.parent
+        assert isinstance(section, OrgSection)
+        section_text = view.substr(section.region)
+        if section.level == 1:
             level1_section_text = section_text
         else:
             level1_section_text = re.sub(
-                '^[*]{{{}}}'.format(section_info.headline_level - 1),
+                '^[*]{{{}}}'.format(section.level - 1),
                 '',
                 section_text)
         level1_section_text = '\n' + level1_section_text.strip('\n') + '\n'
@@ -622,13 +653,10 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
                 outf.write(level1_section_text)
         except IOError as e:
             # Если не ок, жалуемся
-            if not silent:
-                sublime.error_message("can not use `{}' as archive file: {}".format(archive_filename, e))
-            return
+            raise ZorgmodeFatalError("can not use `{}' as archive file: {}".format(archive_filename, e))
         # Если ok, удаляем секцию
-        view.erase(edit, section_info.section_region)
+        view.erase(edit, section.region)
         sublime.status_message("Entry is archived to `{}'".format(archive_filename))
-        return
 
 
 class ZorgFollowLink(sublime_plugin.TextCommand):

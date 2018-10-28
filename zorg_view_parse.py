@@ -18,7 +18,7 @@ HEADLINE_RE = re.compile(
 CONTROL_LINE_RE = re.compile(
     "^\#\+"  # prefix
     "([A-Z_]+) :"  # key
-    "(.*)",  # value
+    "\s* (.*)",  # value
     re.VERBOSE
 )
 KEYWORD_SET = frozenset(["TODO", "DONE"])
@@ -182,6 +182,13 @@ class OrgControlLine(OrgViewNode):
 
     def __init__(self, view, parent):
         super(OrgControlLine, self).__init__(view, parent)
+
+
+def org_control_line_get_key_value(control_line: OrgControlLine):
+    line = control_line.view.substr(control_line.region)
+    m = CONTROL_LINE_RE.match(line)
+    assert m is not None
+    return m.group(1), m.group(2)
 
 
 class OrgGlobalScopeParser(object):
@@ -399,7 +406,7 @@ if __name__ == '__main__':
                 child_entry, = child_lst.children
                 self.assertEqual(_node_text(child_entry), "  * child {}".format(num))
 
-    class HeadlineParsing(unittest.TestCase):
+    class GlobalScopeParsing(unittest.TestCase):
         def test_headline_parsing(self):
             view = mock_sublime.View(
                 "* This is org headline\n"
@@ -430,5 +437,25 @@ if __name__ == '__main__':
                 "UNDONE [#a] HeAdLiNe 6",
             ])
 
+        def test_control_line_parsing(self):
+            view = mock_sublime.View(
+                "#+ARCHIVE: foo\n"
+                "#+BAR: QUX\n"
+                "#+GG: once upon a time...\n"
+                "#+BEGIN_SRC\n"
+                "#+END_SRC\n"
+            )
+            root = parse_org_document(view, mock_sublime.Region(0, view.size()))
+
+            all_control_key_value_list = []
+            for item in iter_tree_depth_first(root):
+                if isinstance(item, OrgControlLine):
+                    all_control_key_value_list.append(org_control_line_get_key_value(item))
+
+            self.assertEqual(all_control_key_value_list, [
+                ("ARCHIVE", "foo"),
+                ("BAR", "QUX"),
+                ("GG", "once upon a time..."),
+            ])
 
     unittest.main()

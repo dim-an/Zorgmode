@@ -9,17 +9,17 @@ class TestArchivation(ZorgTestCase):
     def test_simple_archivation(self):
         with tempfile.NamedTemporaryFile() as tmpf:
             self.setText(
-                ("#+ARCHIVE:{tempfile}\n"
+                "#+ARCHIVE:{tempfile}\n"
                 "* Header 1\n"
                 "** Header 2\n"
-                "* Header 3\n").format(tempfile=tmpf.name))
+                "* Header 3\n".format(tempfile=tmpf.name))
             self.setCursorPos(2, 2)
             self.view.run_command("zorg_move_to_archive")
 
             self.assertEqual(
                 self.getAllText(),
-                ("#+ARCHIVE:{tempfile}\n"
-                "* Header 3\n").format(tempfile=tmpf.name))
+                "#+ARCHIVE:{tempfile}\n"
+                "* Header 3\n".format(tempfile=tmpf.name))
 
             self.assertEqual(
                 tmpf.read().decode('utf-8'),
