@@ -2,6 +2,12 @@
 {
 	"color_scheme": "Packages/zorgmode/Color Scheme/Monokai.sublime-color-scheme",
 
+	"enable_table_editor": true,
+    // Set table syntax for Table Editor.
+    // Valid options are: "Simple", "EmacsOrgMode", "Pandoc", "MultiMarkdown",
+    //                    "reStructuredText", "Textile"
+    "table_editor_syntax": "EmacsOrgMode",
+
 	"link_transform_rules": [
 		{
 			"url_prefix": "gh:",
