@@ -7,11 +7,18 @@ import re
 
 LIST_ENTRY_BEGIN_RE = re.compile(r"^(\s+[*]|\s*[-+]|\s*[0-9]+[.]|\s[a-zA-Z][.])\s+")
 HEADLINE_RE = re.compile(
-    '^([*]+)\s+'  # STARS group 1
-    '(?:([A-Za-z0-9]+)\s+ )?' # KEYWORD group 2
-    '(?:\[[#]([a-zA-Z])\]\s+)?' # PRIORITY group 3
-    '(.*?)' # TITLE -- match in nongreedy fashion group 4
-    '\s*(:(?: [a-zA-Z0-9_@#]+:)+)?\s*$', # TAGS group 5
+    '^([*]+) \s+'  # STARS group 1
+    '(?: ([A-Za-z0-9]+)\s+ )?'  # KEYWORD group 2
+    '(?: \[[#]([a-zA-Z])\]\s+)?'  # PRIORITY group 3
+    '(.*?)'  # TITLE -- match in nongreedy fashion group 4
+    '\s* (:(?: [a-zA-Z0-9_@#]+ :)+)? \s*$',  # TAGS group 5
+    re.VERBOSE
+)
+CONTROL_LINE_RE = re.compile(
+    "^\#\+"  # prefix
+    "([A-Z_]+) :"  # key
+    "(.*)",  # value
+    re.VERBOSE
 )
 
 
@@ -58,6 +65,30 @@ def next_sibling(node):
     
 def prev_sibling(node):
     return sibling(node, -1)
+
+
+def view_full_lines(view, region):
+    # NOTE: line ending might be either '\r\n' or '\n'
+    # TODO: test this function
+    line_region_list = view.lines(region)
+    for i in range(len(line_region_list) - 1):
+        line_region_list[i].b = line_region_list[i+1].a
+    if line_region_list:
+        line_region_list[-1].b = view.size()
+    return line_region_list
+
+
+def parse_org_document(view, region):
+    # 1. Получить список линий начиная с позиции
+    full_line_region_list = view_full_lines(view, region)
+
+    # 2. скармливать их пока не нажрёмся.
+    parser = OrgGlobalScopeParser(view)
+    for line_region in full_line_region_list:
+        if not parser.try_push_line(line_region):
+            break
+
+    return parser.finish()
 
 
 class OrgViewNode(object):
@@ -123,36 +154,51 @@ class OrgListEntry(OrgViewNode):
         self.indent = indent
 
 
-class OrgViewParser(object):
+class OrgControlLine(OrgViewNode):
+    node_type = "control_line"
+
+    def __init__(self, view, parent):
+        super(OrgControlLine, self).__init(view, parent)
+
+
+class OrgGlobalScopeParser(object):
     def __init__(self, view):
-        self._result = OrgSection(view, None, 0)
-        self._stack = [self._result]
+        root = OrgRoot(view)
+        section = OrgSection(view, root, 0)
+        self._root = root
+        self._stack = [root, section]
         self._view = view
 
     def try_push_line(self, region):
         line = self._view.substr(region)
         m = HEADLINE_RE.match(line)
-        if m is None:
-            _extend_region(self._stack[-1], region)
+        if m is not None:
+            headline_level = len(m.group(1))
+            assert headline_level > 0
+            while (
+                not isinstance(self._stack[-1], OrgSection)
+                or self._stack[-1].level >= headline_level
+            ):
+                self._stack.pop()
+
+            new_section = OrgSection(self._view, self._stack[-1], headline_level)
+            headline = OrgHeadline(self._view, new_section, headline_level)
+            self._stack.append(new_section)
+            _extend_region(headline, region)
             return True
 
-        headline_level = len(m.group(1))
-        assert headline_level > 0
-        while (
-            not isinstance(self._stack[-1], OrgSection)
-            or self._stack[-1].level >= headline_level
-        ):
-            self._stack.pop()
+        m = CONTROL_LINE_RE.match(line)
+        if m is not None:
+            control_line = OrgControlLine(self._view, self._root)
+            _extend_region(control_line, region)
+            return True
 
-        new_section = OrgSection(self._view, self._stack[-1], headline_level)
-        headline = OrgHeadline(self._view, new_section, headline_level)
-        self._stack.append(new_section)
-        _extend_region(headline, region)
+        _extend_region(self._stack[-1], region)
         return True
 
     def finish(self):
         self._stack = None
-        return self._result
+        return self._root
 
 
 class OrgListParser(object):

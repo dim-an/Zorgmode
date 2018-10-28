@@ -15,13 +15,13 @@ from .zorg_view_parse import (
     LIST_ENTRY_BEGIN_RE,
 
     OrgHeadline,
-    OrgViewParser,
     OrgListParser,
 
     iter_tree_depth_first,
     find_child_containing_point,
     next_sibling,
-    prev_sibling
+    parse_org_document as parse_org_document_new,
+    prev_sibling,
 )
 
 try:
@@ -824,23 +824,8 @@ class ZorgTodoList(sublime_plugin.TextCommand):
         agenda_output.add_missing_config_warning()
 
         # TODO: Загрузить список файлов для загрузки из конфигурации
-
-        # TODO: factorize
-        # 1. Нужно получить список строк исходного файла.
-        view_size = view.size()
-        line_region_list = view.lines(sublime.Region(0, view_size))
-        for region in line_region_list:
-            # We want our regions to include trailing '\n'
-            if region.b != view_size:
-                region.b += 1
-
-        view_parse = OrgViewParser(view)
-        for region in line_region_list:
-            res = view_parse.try_push_line(region)
-            assert res, repr(res)
-        org_section = view_parse.finish()
-
-        for headline in iter_tree_depth_first(org_section):
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+        for headline in iter_tree_depth_first(org_root):
             if not isinstance(headline, OrgHeadline):
                 continue
             text = headline.text().rstrip('\n')
