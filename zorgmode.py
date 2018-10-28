@@ -17,8 +17,9 @@ from .zorg_view_parse import (
     OrgHeadline,
     OrgListParser,
 
-    iter_tree_depth_first,
     find_child_containing_point,
+    org_headline_get_text,
+    iter_tree_depth_first,
     next_sibling,
     parse_org_document as parse_org_document_new,
     prev_sibling,
@@ -714,12 +715,15 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
 
     @staticmethod
     def follow_header_link(view, caption):
-        org_document = zorg_parse_document(view)
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+
         offset = None
-        for section in org_document.iter_section():
-            text = section.headline.title.get_text()
+        for item in iter_tree_depth_first(org_root):
+            if not isinstance(item, OrgHeadline):
+                continue
+            text = org_headline_get_text(item)
             if text == caption:
-                offset = section.headline.begin
+                offset = item.region.a
 
         if offset is None:
             sublime.status_message("can't follow link, text is not found: `{}'".format(caption))

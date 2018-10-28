@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import sys
 
 # NOTE: this module doesn't import sublime module so we can mock view/region etc in tests
 
@@ -20,6 +21,7 @@ CONTROL_LINE_RE = re.compile(
     "(.*)",  # value
     re.VERBOSE
 )
+KEYWORD_SET = frozenset(["TODO", "DONE"])
 
 
 def is_point_within_region(point, region):
@@ -104,15 +106,22 @@ class OrgViewNode(object):
         return self.view.substr(self.region)
 
     def __repr__(self):
-        return "{cls}({str_repr})".format(cls=type(self).__name__, str_repr=repr(_node_text(self)))
+        text = _node_text(self)
+        if len(text) > 55:
+            text = "{} ... {}".format(text[:25], text[-25:])
+        return "{cls}({str_repr})".format(cls=type(self).__name__, str_repr=repr(text))
 
     def debug_print(self, indent=None, file=None):
+        if file is None:
+            file = sys.stdout
         if indent is None:
             indent = 0
         indent_str = " " * indent
-        print(indent_str + repr(self), file=file)
+        file.write(indent_str + repr(self) + "\n")
         for c in self.children:
             c.debug_print(indent+2)
+        if indent == 0:
+            file.flush()
 
 
 class OrgRoot(OrgViewNode):
@@ -138,6 +147,20 @@ class OrgHeadline(OrgViewNode):
         self.level = level
 
 
+def org_headline_get_text(headline: OrgHeadline):
+    line = headline.view.substr(headline.region)
+    m = HEADLINE_RE.match(line)
+    assert m is not None
+
+    keyword = m.group(2)
+
+    title_begin = m.start(4)
+    title_end = m.end(4)
+    if keyword is not None and keyword not in KEYWORD_SET:
+        title_begin = m.start(2)
+    return line[title_begin:title_end]
+
+
 class OrgList(OrgViewNode):
     node_type = "list"
 
@@ -158,7 +181,7 @@ class OrgControlLine(OrgViewNode):
     node_type = "control_line"
 
     def __init__(self, view, parent):
-        super(OrgControlLine, self).__init(view, parent)
+        super(OrgControlLine, self).__init__(view, parent)
 
 
 class OrgGlobalScopeParser(object):
@@ -171,6 +194,7 @@ class OrgGlobalScopeParser(object):
 
     def try_push_line(self, region):
         line = self._view.substr(region)
+        line = line.rstrip('\n')
         m = HEADLINE_RE.match(line)
         if m is not None:
             headline_level = len(m.group(1))
@@ -298,7 +322,7 @@ if __name__ == '__main__':
     import unittest
 
     import mock_sublime
-    
+
     class TestListParsing(unittest.TestCase):
         def test_simple_list(self):
             view = mock_sublime.View(
@@ -374,5 +398,37 @@ if __name__ == '__main__':
                 self.assertEqual(len(child_lst.children), 1)
                 child_entry, = child_lst.children
                 self.assertEqual(_node_text(child_entry), "  * child {}".format(num))
+
+    class HeadlineParsing(unittest.TestCase):
+        def test_headline_parsing(self):
+            view = mock_sublime.View(
+                "* This is org headline\n"
+                "** TODO headline 2\n"
+                "*** DONE headline 3\n"
+                "**** TODO [#b] headline 4\n"
+                "** UNDONE HEADLINE 5\n"
+                "** UNDONE [#a] HeAdLiNe 6\n"
+            )
+
+            root = parse_org_document(view, mock_sublime.Region(0, view.size()))
+
+            all_headlines = []
+            for item in iter_tree_depth_first(root):
+                if isinstance(item, OrgHeadline):
+                    all_headlines.append(item)
+
+            headline_text_list = [
+                org_headline_get_text(h)
+                for h in all_headlines
+            ]
+            self.assertEqual(headline_text_list, [
+                "This is org headline",
+                "headline 2",
+                "headline 3",
+                "headline 4",
+                "UNDONE HEADLINE 5",
+                "UNDONE [#a] HeAdLiNe 6",
+            ])
+
 
     unittest.main()
