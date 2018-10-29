@@ -33,7 +33,7 @@
         }]
     },
     {
-        "keys": ["alt+up"],
+        "keys": ["ctrl+shift+up"],
         "command": "zorg_move_node_up",
         "context": [{
                 "key": "selector",
@@ -41,7 +41,7 @@
         }]
     },
     {
-        "keys": ["alt+up"],
+        "keys": ["ctrl+shift+up"],
         "command": "zorg_move_node_up",
         "context": [{
                 "key": "selector",
@@ -49,7 +49,7 @@
         }]
     },
     {
-        "keys": ["alt+down"],
+        "keys": ["ctrl+shift+down"],
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
@@ -57,7 +57,7 @@
         }]
     },
     {
-        "keys": ["alt+down"],
+        "keys": ["ctrl+shift+down"],
         "command": "zorg_move_node_down",
         "context": [{
                 "key": "selector",
