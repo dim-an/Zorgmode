@@ -1,5 +1,7 @@
 Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeText 3.
 
+[[https://travis-ci.org/dim-an/][file:https://travis-ci.org/dim-an/zorgmode.svg?branch=master]]
+
 * Installation
 : # Go to Packages directory (you can find one using menu =Preferences= -> =Browse Packages=).
 : cd /path/to/package/directory
