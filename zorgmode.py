@@ -836,14 +836,44 @@ def get_zorgmode_syntax():
     return lst[0]
 
 
+class QuickPanelAgenda(object):
+    def __init__(self, window):
+        view = window.find_output_panel("output.agenda")
+        if view is not None:
+            window.destroy_output_panel("output.agenda")
+        view = window.create_output_panel("agenda")
+
+        self.view = view
+        self._window = window
+
+    def focus(self):
+        self._window.run_command("show_panel", {"panel": "output.agenda"})
+        self._window.focus_view(self.view)
+
+
+class NewTabAgenda(object):
+    def __init__(self, window):
+        self.view = window.new_file()
+        self.view.set_scratch(True)
+        self._window = window
+
+    def focus(self):
+        self._window.focus_view(self.view)
+
+
 class ZorgTodoList(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit, show_in="quick_panel"):
         view = self.view
 
         zorg_syntax = get_zorgmode_syntax()
         if zorg_syntax is None:
             sublime.status_message("Cannot find zorgmode syntax file. Probably zorgmode is not installed correctly")
             return
+
+        output_cls = {
+            "quick_panel": QuickPanelAgenda,
+            "new_tab": NewTabAgenda,
+        }[show_in]
 
         window = view.window()
 
@@ -860,16 +890,15 @@ class ZorgTodoList(sublime_plugin.TextCommand):
             if m:
                 agenda_output.add_todo_item(headline)
 
-        agenda_view = window.find_output_panel("output.agenda")
-        if agenda_view is not None:
-            window.destroy_output_panel("output.agenda")
-        agenda_view = window.create_output_panel("agenda")
-        agenda_view.set_syntax_file(zorg_syntax)
-        agenda_view.run_command("append", {"characters": agenda_output.finalize(), "force": True})
-        agenda_view.set_read_only(True)
-        AGENDA_REGISTRY.save_agenda(agenda_view, agenda_output)
-        window.run_command("show_panel", {"panel": "output.agenda"})
-        window.focus_view(agenda_view)
+        output = output_cls(window)
+
+        output.view.set_syntax_file(zorg_syntax)
+        output.view.run_command("append", {"characters": agenda_output.finalize(), "force": True})
+        output.view.set_read_only(True)
+
+        AGENDA_REGISTRY.save_agenda(output.view, agenda_output)
+
+        output.focus()
 
 
 def agenda_meta_info_get_or_create_view(window: sublime.Window, meta_info: Agenda.AgendaItemMetaInfo):
@@ -924,6 +953,7 @@ class ZorgAgendaGoto(sublime_plugin.TextCommand):
             # Перейти на начало соответствующей строки
             group_idx, _ = window.get_view_index(file_view)
             window.focus_group(group_idx)
+            window.focus_view(file_view)
 
             goto(file_view, best_region.a)
 

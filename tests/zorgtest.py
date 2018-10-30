@@ -6,15 +6,20 @@ from unittest import TestCase
 
 import sublime
 
+
 class ZorgTestCase(TestCase):
     def setUp(self):
+        self.active_views_before_test = set(v.id() for v in sublime.active_window().views())
         self.view = sublime.active_window().new_file()
 
     def tearDown(self):
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
+        current_active_views = list(sublime.active_window().views())
+        for view in current_active_views:
+            if view.id() in self.active_views_before_test:
+                continue
+            view.set_scratch(True)
+            view.window().focus_view(view)
+            view.window().run_command("close_file")
 
     def setCursorPos(self, line, column):
         line -= 1
@@ -36,6 +41,10 @@ class ZorgTestCase(TestCase):
 
     def getAllText(self):
         return self.view.substr(sublime.Region(0, self.view.size()))
+
+    def get_active_view_text(self):
+        view = sublime.active_window().active_view()
+        return view.substr(sublime.Region(0, view.size()))
 
     @contextmanager
     def ensureNothingChanges(self):
