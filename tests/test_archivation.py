@@ -3,21 +3,26 @@
 
 import tempfile
 
-from zorgtest import ZorgTestCase
+from zorgtest import (
+    get_active_view_text,
+    set_active_view_cursor_position,
+    set_active_view_text,
+    ZorgTestCase,
+)
 
 class TestArchivation(ZorgTestCase):
     def test_simple_archivation(self):
         with tempfile.NamedTemporaryFile() as tmpf:
-            self.setText(
+            set_active_view_text(
                 "#+ARCHIVE:{tempfile}\n"
                 "* Header 1\n"
                 "** Header 2\n"
                 "* Header 3\n".format(tempfile=tmpf.name))
-            self.setCursorPos(2, 2)
+            set_active_view_cursor_position(2, 2)
             self.view.run_command("zorg_move_to_archive")
 
             self.assertEqual(
-                self.getAllText(),
+                get_active_view_text(),
                 "#+ARCHIVE:{tempfile}\n"
                 "* Header 3\n".format(tempfile=tmpf.name))
 
@@ -29,16 +34,16 @@ class TestArchivation(ZorgTestCase):
 
     def test_subheadline_archivation(self):
         with tempfile.NamedTemporaryFile() as tmpf:
-            self.setText(
+            set_active_view_text(
                 ("#+ARCHIVE:{tempfile}\n"
                 "* Header 1\n"
                 "** Header 2\n"
                 "* Header 3\n").format(tempfile=tmpf.name))
-            self.setCursorPos(3, 2)
+            set_active_view_cursor_position(3, 2)
             self.view.run_command("zorg_move_to_archive")
 
             self.assertEqual(
-                self.getAllText(),
+                get_active_view_text(),
                 ("#+ARCHIVE:{tempfile}\n"
                 "* Header 1\n"
                 "* Header 3\n").format(tempfile=tmpf.name))
@@ -47,15 +52,15 @@ class TestArchivation(ZorgTestCase):
                  "\n* Header 2\n")
 
     def test_archivation_to_nonexisting_directory(self):
-        self.setText(
+        set_active_view_text(
             "#+ARCHIVE:/dev/null/inexistent_file\n"
             "* Header 1\n"
             "** Header 2\n"
             "* Header 3\n")
-        self.setCursorPos(3, 2)
+        set_active_view_cursor_position(3, 2)
         self.view.run_command("zorg_move_to_archive", {"silent": True})
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             ("#+ARCHIVE:/dev/null/inexistent_file\n"
             "* Header 1\n"
             "** Header 2\n"

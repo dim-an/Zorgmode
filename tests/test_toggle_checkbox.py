@@ -2,47 +2,38 @@
 # -*- coding: utf-8 -*-
 
 import sublime
-from zorgtest import ZorgTestCase
+from zorgtest import (
+    get_active_view_text,
+    set_active_view_text,
+    set_active_view_cursor_position,
+    ZorgTestCase,
+)
+
 
 class TestMoveUp(ZorgTestCase):
-    def setUp(self):
-        self.view = sublime.active_window().new_file()
-
-    def tearDown(self):
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
-
-    def setText(self, string):
-        self.view.run_command("append", {"characters": string})
-
-    def getAllText(self):
-        return self.view.substr(sublime.Region(0, self.view.size()))
-
     def test_toggle_checkbox(self):
-        self.setText(
+        set_active_view_text(
             "* Caption\n"
             " - [ ] checkbox\n")
 
-        self.setCursorPos(1, 1)
+        set_active_view_cursor_position(1, 1)
         self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* Caption\n"
             " - [ ] checkbox\n")
 
-        self.setCursorPos(2, 1)
+        set_active_view_cursor_position(2, 1)
         self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* Caption\n"
             " - [X] checkbox\n")
 
-        self.setCursorPos(2, 1)
+        set_active_view_cursor_position(2, 1)
         self.view.run_command('zorg_toggle_checkbox')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* Caption\n"
             " - [ ] checkbox\n")
 
@@ -58,14 +49,14 @@ class TestMoveUp(ZorgTestCase):
             " [ ] Not a checkbox\n"
             "- [ ] Checkbox\n"
             "-[ ] Not a checkbox\n")
-        self.setText(TEST_STRING)
+        set_active_view_text(TEST_STRING)
 
         for i in range(len(TEST_STRING.strip('\n').split('\n'))):
-            self.setCursorPos(i, 1)
+            set_active_view_cursor_position(i, 1)
             self.view.run_command('zorg_toggle_checkbox')
 
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* [ ] Not checkbox but a headline\n"
             " * [X] This is checkbox\n"
             " + [X] Also checkbox\n"

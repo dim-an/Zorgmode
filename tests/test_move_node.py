@@ -2,103 +2,95 @@
 # -*- coding: utf-8 -*-
 
 import sublime
-from zorgtest import ZorgTestCase
+from zorgtest import (
+    get_active_view_text,
+    get_active_view_cursor_position,
+    set_active_view_cursor_position,
+    set_active_view_text,
+    ZorgTestCase
+)
+
 
 class TestMoveHeader(ZorgTestCase):
-    def setUp(self):
-        self.view = sublime.active_window().new_file()
-
-    def tearDown(self):
-        if self.view:
-            self.view.set_scratch(True)
-            self.view.window().focus_view(self.view)
-            self.view.window().run_command("close_file")
-
-    def setText(self, string):
-        self.view.run_command("append", {"characters": string})
-
-    def getAllText(self):
-        return self.view.substr(sublime.Region(0, self.view.size()))
-
     def test_ordinary_move(self):
-        self.setText(
+        set_active_view_text(
             "some stuff\n"
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
-        self.setCursorPos(1, 2)
+        set_active_view_cursor_position(1, 2)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "some stuff\n"
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
-        self.assertEqual(self.getCursorPos(), (1, 2))
+        self.assertEqual(get_active_view_cursor_position(), (1, 2))
 
-        self.setCursorPos(2, 3)
+        set_active_view_cursor_position(2, 3)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "some stuff\n"
             "** Caption2\n"
             "** Caption\n"
             "some text\n"
             "*** Other caption\n")
-        self.assertEqual(self.getCursorPos(), (3, 3))
+        self.assertEqual(get_active_view_cursor_position(), (3, 3))
 
-        self.setCursorPos(2, 3)
+        set_active_view_cursor_position(2, 3)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "some stuff\n"
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
-        self.assertEqual(self.getCursorPos(), (5, 3))
+        self.assertEqual(get_active_view_cursor_position(), (5, 3))
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "some stuff\n"
             "** Caption2\n"
             "** Caption\n"
             "some text\n"
             "*** Other caption\n")
-        self.assertEqual(self.getCursorPos(), (2, 3))
+        self.assertEqual(get_active_view_cursor_position(), (2, 3))
 
     def test_edge_of_file(self):
-        self.setText(
+        set_active_view_text(
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
 
-        self.setCursorPos(1, 5)
+        set_active_view_cursor_position(1, 5)
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
-        self.assertEqual(self.getCursorPos(), (1, 5))
+        self.assertEqual(get_active_view_cursor_position(), (1, 5))
 
-        self.setCursorPos(4, 2)
+        set_active_view_cursor_position(4, 2)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
             "** Caption2\n")
-        self.assertEqual(self.getCursorPos(), (4, 2))
+        self.assertEqual(get_active_view_cursor_position(), (4, 2))
 
     def test_other_headline(self):
-        self.setText(
+        set_active_view_text(
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
@@ -107,10 +99,10 @@ class TestMoveHeader(ZorgTestCase):
             "** Caption2\n"
             "*** Other caption 3\n")
 
-        self.setCursorPos(3, 5)
+        set_active_view_cursor_position(3, 5)
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption\n"
             "some text\n"
             "*** Other caption\n"
@@ -118,11 +110,11 @@ class TestMoveHeader(ZorgTestCase):
             "*** Other caption 2\n"
             "** Caption2\n"
             "*** Other caption 3\n")
-        self.assertEqual(self.getCursorPos(), (3, 5))
+        self.assertEqual(get_active_view_cursor_position(), (3, 5))
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption\n"
             "some text\n"
             "*** Other caption 2\n"
@@ -130,11 +122,11 @@ class TestMoveHeader(ZorgTestCase):
             "some other text\n"
             "** Caption2\n"
             "*** Other caption 3\n")
-        self.assertEqual(self.getCursorPos(), (4, 5))
+        self.assertEqual(get_active_view_cursor_position(), (4, 5))
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption\n"
             "some text\n"
             "*** Other caption 2\n"
@@ -142,38 +134,38 @@ class TestMoveHeader(ZorgTestCase):
             "some other text\n"
             "** Caption2\n"
             "*** Other caption 3\n")
-        self.assertEqual(self.getCursorPos(), (4, 5))
+        self.assertEqual(get_active_view_cursor_position(), (4, 5))
 
     def test_cursor_on_boundary(self):
-        self.setText(
+        set_active_view_text(
             "** Caption\n"
             "** Caption2\n"
             "text\n")
-        self.setCursorPos(2, 1)
+        set_active_view_cursor_position(2, 1)
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption2\n"
             "text\n"
             "** Caption\n")
-        self.assertEqual(self.getCursorPos(), (1, 1))
+        self.assertEqual(get_active_view_cursor_position(), (1, 1))
 
     def test_missing_new_line_at_eof(self):
-        self.setText(
+        set_active_view_text(
             "** Caption\n"
             "** Caption2\n"
             "text")
-        self.setCursorPos(2, 1)
+        set_active_view_cursor_position(2, 1)
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "** Caption2\n"
             "text\n"
             "** Caption")
-        self.assertEqual(self.getCursorPos(), (1, 1))
+        self.assertEqual(get_active_view_cursor_position(), (1, 1))
 
     def test_respect_folding(self):
-        self.setText(
+        set_active_view_text(
             "* Caption {\n"
             "some text}\n"
             "* Caption 2\n"
@@ -181,7 +173,7 @@ class TestMoveHeader(ZorgTestCase):
             "text\n"
             "** subsection\n"
             "more text}")
-        self.setCursorPos(1, 2)
+        set_active_view_cursor_position(1, 2)
         self.view.run_command('zorg_cycle_all')
         try:
             self.assertProperFolding()
@@ -191,7 +183,7 @@ class TestMoveHeader(ZorgTestCase):
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* Caption 2\n"
             "* Caption {\n"
             "some text}\n"
@@ -203,7 +195,7 @@ class TestMoveHeader(ZorgTestCase):
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "* Caption 2\n"
             "* Caption 3 {\n"
             "text\n"
@@ -244,96 +236,96 @@ class TestMoveListEntry(ZorgTestCase):
             self.view.window().run_command("close_file")
 
     def test_ordinary_move(self):
-        self.setText(
+        set_active_view_text(
             " - List entry\n"
             " - Other list entry\n")
-        self.setCursorPos(1, 1)
+        set_active_view_cursor_position(1, 1)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - Other list entry\n"
             " - List entry\n")
-        self.assertEqual(self.getCursorPos(), (2, 1))
+        self.assertEqual(get_active_view_cursor_position(), (2, 1))
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - Other list entry\n"
             " - List entry\n")
-        self.assertEqual(self.getCursorPos(), (2, 1))
+        self.assertEqual(get_active_view_cursor_position(), (2, 1))
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             " - Other list entry\n")
-        self.assertEqual(self.getCursorPos(), (1, 1))
+        self.assertEqual(get_active_view_cursor_position(), (1, 1))
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             " - Other list entry\n")
-        self.assertEqual(self.getCursorPos(), (1, 1))
+        self.assertEqual(get_active_view_cursor_position(), (1, 1))
 
     def test_sublists(self):
-        self.setText(
+        set_active_view_text(
             " - List entry\n"
             "  * child list entry\n"
             "  * other child list entry\n"
             " - Other list entry\n"
             "  * 333333\n")
-        self.setCursorPos(2, 1)
+        set_active_view_cursor_position(2, 1)
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             "  * other child list entry\n"
             "  * child list entry\n"
             " - Other list entry\n"
             "  * 333333\n")
-        self.assertEqual(self.getCursorPos(), (3, 1))
+        self.assertEqual(get_active_view_cursor_position(), (3, 1))
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             "  * other child list entry\n"
             "  * child list entry\n"
             " - Other list entry\n"
             "  * 333333\n")
-        self.assertEqual(self.getCursorPos(), (3, 1))
+        self.assertEqual(get_active_view_cursor_position(), (3, 1))
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             "  * child list entry\n"
             "  * other child list entry\n"
             " - Other list entry\n"
             "  * 333333\n")
-        self.assertEqual(self.getCursorPos(), (2, 1))
+        self.assertEqual(get_active_view_cursor_position(), (2, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_up')
 
-        self.setCursorPos(1, 1)
+        set_active_view_cursor_position(1, 1)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - Other list entry\n"
             "  * 333333\n"
             " - List entry\n"
             "  * child list entry\n"
             "  * other child list entry\n")
-        self.assertEqual(self.getCursorPos(), (3, 1))
+        self.assertEqual(get_active_view_cursor_position(), (3, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_down')
 
     def test_text(self):
-        self.setText(
+        set_active_view_text(
             " - List entry\n"
             "  1111\n"
             "  * sublst 1 child 1\n"
@@ -344,18 +336,18 @@ class TestMoveListEntry(ZorgTestCase):
             "  * 4444\n"
             "  3333\n"
         )
-        self.setCursorPos(3, 1)
+        set_active_view_cursor_position(3, 1)
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_up')
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_down')
 
-        self.setCursorPos(5, 1)
+        set_active_view_cursor_position(5, 1)
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             "  1111\n"
             "  * sublst 1 child 1\n"
@@ -366,14 +358,14 @@ class TestMoveListEntry(ZorgTestCase):
             "  * 4444\n"
             "  3333\n"
         )
-        self.assertEqual(self.getCursorPos(), (6, 1))
+        self.assertEqual(get_active_view_cursor_position(), (6, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_down')
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             " - List entry\n"
             "  1111\n"
             "  * sublst 1 child 1\n"
@@ -384,15 +376,15 @@ class TestMoveListEntry(ZorgTestCase):
             "  * 4444\n"
             "  3333\n"
         )
-        self.assertEqual(self.getCursorPos(), (5, 1))
+        self.assertEqual(get_active_view_cursor_position(), (5, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_up')
 
 
 
     def test_empty_lines(self):
-        self.setText(
+        set_active_view_text(
             "  * 0000\n"
             "\n"
             "\n"
@@ -403,11 +395,11 @@ class TestMoveListEntry(ZorgTestCase):
             " \n"
             " * 3333\n"
         )
-        self.setCursorPos(4, 1)
+        set_active_view_cursor_position(4, 1)
 
         self.view.run_command('zorg_move_node_down')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "  * 0000\n"
             "\n"
             "\n"
@@ -418,14 +410,14 @@ class TestMoveListEntry(ZorgTestCase):
             " \n"
             " * 3333\n"
         )
-        self.assertEqual(self.getCursorPos(), (6, 1))
+        self.assertEqual(get_active_view_cursor_position(), (6, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_down')
 
         self.view.run_command('zorg_move_node_up')
         self.assertEqual(
-            self.getAllText(),
+            get_active_view_text(),
             "  * 0000\n"
             "\n"
             "\n"
@@ -436,7 +428,7 @@ class TestMoveListEntry(ZorgTestCase):
             " \n"
             " * 3333\n"
         )
-        self.assertEqual(self.getCursorPos(), (4, 1))
+        self.assertEqual(get_active_view_cursor_position(), (4, 1))
 
-        with self.ensureNothingChanges():
+        with self.ensure_nothing_changes():
             self.view.run_command('zorg_move_node_up')
