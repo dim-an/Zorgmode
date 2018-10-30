@@ -33,13 +33,17 @@ def get_active_view_cursor_position():
     return r + 1, c + 1
 
 
-def set_active_view_cursor_position(line, column):
-    view = get_active_view()
+def set_cursor_position(view, line, column):
     line -= 1
     column -= 1
     point = view.text_point(line, column)
     view.sel().clear()
     view.sel().add(sublime.Region(point))
+
+
+def set_active_view_cursor_position(line, column):
+    view = get_active_view()
+    set_cursor_position(view, line, column)
 
 
 def set_active_view_text(string):
