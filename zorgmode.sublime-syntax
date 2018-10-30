@@ -1,6 +1,7 @@
 %YAML 1.2
 ---
 file_extensions: [org, org_archive]
+first_line_match: "^#[+][A-Z]+"
 scope: text.org
 name: zorgmode
 
@@ -11,6 +12,7 @@ contexts:
         - include: expect_list_entry
         - include: expect_link
         - include: expect_special_line
+        - include: expect_src
 
     expect_list_entry:
         - match: '^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+'
@@ -105,6 +107,22 @@ contexts:
     expect_special_line:
         - match: '^#\+[A-Z_]+:.*$'
           scope: special_line.text.org
+
+    expect_src:
+        - match: '^#\+BEGIN_SRC\s+(py|python)\s*'
+          scope: special_line
+          embed: Packages/Python/Python.sublime-syntax
+          escape : '^#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^#\+BEGIN_SRC\s+(c\+\+|cpp|cxx)\s*'
+          scope: special_line
+          embed: Packages/C++/C++.sublime-syntax
+          escape : '^#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
 
     expect_agenda:
         - match: '^#\+BEGIN_AGENDA'
