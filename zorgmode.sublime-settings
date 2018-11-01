@@ -1,17 +1,31 @@
-// These settings override both User and Default settings for the zorgmode syntax
 {
-	"color_scheme": "Packages/zorgmode/Color Scheme/Monokai.sublime-color-scheme",
+    //
+    // Currently there is only one color scheme that supports zorgmode syntax :(
+    "color_scheme": "Packages/zorgmode/Color Scheme/Monokai.sublime-color-scheme",
 
-	"enable_table_editor": true,
-    // Set table syntax for Table Editor.
-    // Valid options are: "Simple", "EmacsOrgMode", "Pandoc", "MultiMarkdown",
-    //                    "reStructuredText", "Textile"
+    //
+    // `enable_table_editor` and `table_editor_syntax` are for TableEditor plugin.
+    // 
+    //   https://packagecontrol.io/packages/Table%20Editor
+    //
+    "enable_table_editor": true,
     "table_editor_syntax": "EmacsOrgMode",
 
-	"link_transform_rules": [
-		{
-			"url_prefix": "gh:",
-			"replacement": "https://github.com/%s"
-		}
-	]
+    //
+    // `zorg_link_abbrev_list` contains a list of link abbreviations.
+    "zorg_link_abbrev_list": [
+      //  {
+      //      // [[gh:torvalds/linux]] -> [[http://github.com/torvalds/linux]]
+      //      "scheme": "gh:",
+      //      "expansion": "https://github.com/%s"
+      //  },
+    ],
+
+    //
+    // `zorg_agenda_files` contains a list of files that will be checked when
+    // zorgmode creates agenda.
+    "zorg_agenda_files": [
+        // ~/org/TODO.org,  // you can specify path to a file
+        // ~/org/*.org,     // globs also work
+    ],
 }
