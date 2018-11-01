@@ -1,5 +1,49 @@
 [
     {
+        "caption": "Tools",
+        "id": "tools",
+        "children":
+        [
+            { "caption": "-", "id": "zorgmode" },
+            {
+                "caption": "Zorgmode",
+                "mnemonic": "Z",
+                "children":
+                [
+                    {
+                        "caption": "Agenda: show TODO list",
+                        "mnemonic": "T",
+                        "command": "zorg_todo_list"
+
+                    },
+                    {
+                        "caption": "Agenda list",
+                        "mnemonic": "l",
+                        "children":
+                        [
+                            {
+                                "command": "zorg_agenda_list_remove_file",
+                                "caption": "Remove from list",
+                                "mnemonic": "r"
+                            },
+                            {
+                                "command": "zorg_agenda_list_add_file",
+                                "caption": "Put to front",
+                                "mnemonic": "f"
+                            },
+                            {
+                                "command": "zorg_agenda_list_add_file",
+                                "caption": "Put to end",
+                                "mnemonic": "e",
+                                "args": {"dest": "end"}
+                            }
+                        ]
+                    } 
+                ]
+            }
+        ]
+    },
+    {
         "caption": "Preferences",
         "mnemonic": "n",
         "id": "preferences",
@@ -27,7 +71,7 @@
                                     "platform": "Linux"
                                 },
                                 "caption": "Key Bindings – Default"
-                            },
+                            }
                         ]
                     }
                 ]
