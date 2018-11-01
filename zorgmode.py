@@ -10,6 +10,11 @@ import webbrowser
 import sublime_plugin
 import sublime
 
+from .mock_sublime import (
+    View as TextView,
+    Region as TextViewRegion
+)
+
 from .zorg_view_parse import (
     LIST_ENTRY_BEGIN_RE,
 
@@ -34,6 +39,8 @@ except ImportError:
     history_list_plugin = None
 
 MAX_HEADLINE_LEVEL = 30
+ZORG_AGENDA_FILES = "zorg_agenda_files"
+ZORGMODE_SUBLIME_SETTINGS = "zorgmode.sublime-settings"
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
@@ -111,6 +118,15 @@ def view_get_cursor_point(view):
     if not sel.empty():
         raise ZorgmodeError("Cannot run this command with selection")
     return sel.a
+
+
+def view_get_full_region(v):
+    if isinstance(v, TextView):
+        cls = TextViewRegion
+    else:
+        assert isinstance(v, sublime.View)
+        cls = sublime.Region
+    return cls(0, v.size())
 
 
 class OrgmodeStructure(object):
@@ -878,17 +894,28 @@ class ZorgTodoList(sublime_plugin.TextCommand):
         window = view.window()
 
         agenda_output = Agenda()
-        agenda_output.add_missing_config_warning()
 
-        # TODO: Загрузить список файлов для загрузки из конфигурации
-        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
-        for headline in iter_tree_depth_first(org_root):
-            if not isinstance(headline, OrgHeadline):
+        settings = sublime.load_settings("zorgmode.sublime-settings")
+        zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+
+        for file_name in zorg_agenda_files:
+            try:
+                inf = open(file_name)
+            except:
+                # TODO: print warning
                 continue
-            text = headline.text().rstrip('\n')
-            m = re.match("^[*]+\s(TODO\s.*)$", text)
-            if m:
-                agenda_output.add_todo_item(headline)
+
+            with inf:
+                text_view = TextView(inf.read(), file_name)
+
+            org_root = parse_org_document_new(text_view, view_get_full_region(text_view))
+            for headline in iter_tree_depth_first(org_root):
+                if not isinstance(headline, OrgHeadline):
+                    continue
+                text = headline.text().rstrip('\n')
+                m = re.match("^[*]+\s(TODO\s.*)$", text)
+                if m:
+                    agenda_output.add_todo_item(headline)
 
         output = output_cls(window)
 
@@ -959,3 +986,71 @@ class ZorgAgendaGoto(sublime_plugin.TextCommand):
 
         except ZorgmodeError as e:
             sublime.status_message(str(e))
+
+
+def is_agenda_list_command_visible(view):
+    return (
+        view.file_name() is not None
+        and view.settings().get("syntax").endswith("zorgmode.sublime-syntax")
+    )
+
+
+class ZorgAgendaListAddFile(sublime_plugin.TextCommand):
+    def is_visible(self):
+        return is_agenda_list_command_visible(self.view)
+
+    def run(self, edit, dest="front"):
+        try:
+            view = self.view
+            file_name = view.file_name()
+            if file_name is None:
+                raise ZorgmodeFatalError("Cannot add file without name to zorg_agenda_list")
+            file_name = os.path.abspath(file_name)
+            settings = sublime.load_settings("zorgmode.sublime-settings")
+            zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+
+            new_zorg_agenda_files = []
+            if dest == "front":
+                new_zorg_agenda_files.append(file_name)
+            for f in zorg_agenda_files:
+                if f != file_name:
+                    new_zorg_agenda_files.append(f)
+            if dest == "end":
+                new_zorg_agenda_files.append(file_name)
+            settings.set(ZORG_AGENDA_FILES, new_zorg_agenda_files)
+            sublime.save_settings("zorgmode.sublime-settings")
+        except ZorgmodeError as e:
+            sublime.status_message(str(e))
+        except ZorgmodeFatalError as e:
+            sublime.error_message(str(e))
+
+
+class ZorgAgendaListRemoveFile(sublime_plugin.TextCommand):
+    def is_visible(self):
+        return is_agenda_list_command_visible(self.view)
+
+    def is_enabled(self):
+        settings = sublime.load_settings("zorgmode.sublime-settings")
+        zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+        return self.view.file_name() is not None and os.path.abspath(self.view.file_name()) in zorg_agenda_files
+
+    def run(self, edit):
+        try:
+            view = self.view
+            file_name = view.file_name()
+            if file_name is None:
+                raise ZorgmodeFatalError("Cannot add file without name to zorg_agenda_list")
+            file_name = os.path.abspath(file_name)
+            settings = sublime.load_settings("zorgmode.sublime-settings")
+            zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+
+            new_zorg_agenda_files = []
+            for f in zorg_agenda_files:
+                if f != file_name:
+                    new_zorg_agenda_files.append(f)
+            settings.set(ZORG_AGENDA_FILES, new_zorg_agenda_files)
+            sublime.save_settings("zorgmode.sublime-settings")
+        except ZorgmodeError as e:
+            sublime.status_message(str(e))
+        except ZorgmodeFatalError as e:
+            sublime.error_message(str(e))

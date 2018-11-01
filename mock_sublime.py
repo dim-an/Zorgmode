@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import bisect
+
 
 class Region(object):
     __slots__ = ["a", "b"]
@@ -16,8 +18,22 @@ class Region(object):
 
 
 class View(object):
-    def __init__(self, text: str):
+    def __init__(self, text: str, file_name: str = None):
         self.text = text
+        self._line_index = [0]
+        self._file_name = file_name
+
+        idx = None
+        while idx != -1:
+            idx = self.text.find("\n", self._line_index[-1])
+            if idx != -1:
+                self._line_index.append(idx + 1)
+
+    def file_name(self):
+        return self._file_name
+
+    def id(self):
+        return None
 
     def size(self):
         return len(self.text)
@@ -34,6 +50,12 @@ class View(object):
     def substr(self, region):
         return self.text[region.a:region.b]
 
+    def rowcol(self, point):
+        assert point >= 0
+        row_index = bisect.bisect_right(self._line_index, point) - 1
+        col_index = point - self._line_index[row_index]
+        return (row_index, col_index)
+
     def lines(self, region):
         # TODO: интересно, как это счастье работает когда region на границе линии.
         a = self.text.rfind("\n", 0, region.a)
@@ -46,7 +68,11 @@ class View(object):
         while a < region.b:
             b = self.text.find('\n', a)
             if b == -1:
-                b = self.text.size()
+                try:
+                    b = self.size()
+                except:
+                    print(repr(self))
+                    raise
             result.append(Region(a, b - 1))
             a = b + 1
         return result
