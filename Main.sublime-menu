@@ -7,6 +7,7 @@
             { "caption": "-", "id": "zorgmode" },
             {
                 "caption": "Zorgmode",
+                "id": "zorgmode",
                 "mnemonic": "Z",
                 "children":
                 [
@@ -57,24 +58,27 @@
                 [
                     {
                         "caption": "Zorgmode",
+                        "id": "zorgmode",
+                        "mnemonic": "Z",
                         "children":
                         [
                             {
-                                "command": "open_file",
-                                "args": {
-                                    "file": "${packages}/zorgmode/Default (Linux).sublime-keymap",
-                                    "platform": "Linux"
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/zorgmode/Default ($platform).sublime-keymap",
+                                    "default": "[\n\t$0\n]\n"
                                 },
-                                "caption": "Key Bindings – Default"
+                                "caption": "Key Bindings",
                             },
                             {
                                 "command": "edit_settings", "args":
                                 {
                                     "base_file": "${packages}/zorgmode/zorgmode.sublime-settings",
-                                    "default": "// Settings in here override those in \"Default/Preferences.sublime-settings\",\n// and are overridden in turn by syntax-specific settings.\n{\n\t$0\n}\n"
+                                    "default": "// Check Default Zorgmode settings for list of available options\n{\n}\n"
                                 },
-                                "caption": "Zorgmode Settings"
+                                "caption": "Settings"
                             },
+                            { "caption": "-", "id": "help"},
                             {
                                 "command": "open_file",
                                 "args": {"file": "${packages}/zorgmode/README.org"},
