@@ -61,21 +61,29 @@
                         [
                             {
                                 "command": "open_file",
-                                "args": {"file": "${packages}/zorgmode/README.org"},
-                                "caption": "README"
-                            },
-                            {
-                                "command": "open_file",
                                 "args": {
                                     "file": "${packages}/zorgmode/Default (Linux).sublime-keymap",
                                     "platform": "Linux"
                                 },
                                 "caption": "Key Bindings – Default"
+                            },
+                            {
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/zorgmode/zorgmode.sublime-settings",
+                                    "default": "// Settings in here override those in \"Default/Preferences.sublime-settings\",\n// and are overridden in turn by syntax-specific settings.\n{\n\t$0\n}\n"
+                                },
+                                "caption": "Zorgmode Settings"
+                            },
+                            {
+                                "command": "open_file",
+                                "args": {"file": "${packages}/zorgmode/README.org"},
+                                "caption": "README"
                             }
                         ]
                     }
                 ]
-            }
+            },
         ]
     }
 ]
