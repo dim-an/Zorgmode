@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import collections
+import glob
 import itertools
 import os
 import re
@@ -780,20 +781,21 @@ class Agenda(object):
     ])
 
     def __init__(self):
-        self._lines = []
-        self._add_line("#+BEGIN_AGENDA", None)
+        self._todos = []
+        self._warnings = []
+        self._final_lines = None
 
-    def _add_line(self, text, meta_info):
+    @staticmethod
+    def _check_line(text):
         if "\n" in text:
             raise ValueError("It's not a single line")
-        self._lines.append(self.AgendaLine(text, meta_info))
 
     def get_line_meta_info(self, line_index_0: int) -> AgendaItemMetaInfo:
-        return self._lines[line_index_0].meta_info
+        return self._final_lines[line_index_0].meta_info
 
-    def add_missing_config_warning(self):
-        # TODO: proper warning
-        self._add_line("#+WARNING: agenda_configuration is not found", None)
+    def add_warning(self, msg):
+        self._check_line(msg)
+        self._warnings.append(self.AgendaLine("#+WARNING: " + msg, None))
 
     def add_todo_item(self, headline_node):
         view = headline_node.view
@@ -809,11 +811,16 @@ class Agenda(object):
             line_index_0=row,
             original_text=original_text,
         )
-        self._add_line("  TODO:    " + stripped_text, meta_info)
+        self._check_line(stripped_text)
+        self._todos.append(self.AgendaLine("  TODO:    " + stripped_text, meta_info))
 
     def finalize(self):
-        self._add_line("#+END_AGENDA", None)
-        iter_lines = (line.text for line in self._lines)
+        self._final_lines = []
+        self._final_lines.append(self.AgendaLine("#+BEGIN_AGENDA", None))
+        self._final_lines += self._warnings
+        self._final_lines += self._todos
+        self._final_lines.append(self.AgendaLine("#+END_AGENDA", None))
+        iter_lines = (line.text for line in self._final_lines)
         return "\n".join(iter_lines) + "\n"
 
 
@@ -877,6 +884,36 @@ class NewTabAgenda(object):
         self._window.focus_view(self.view)
 
 
+def expand_file_list(file_list, agenda_output):
+    result = []
+    unique = set()
+    for file_name in file_list:
+        file_name = os.path.expanduser(file_name)
+        if not os.path.isabs(file_name):
+            agenda_output.add_warning(
+                "Path `{file_name} in `{settings}' is not absolute."
+                .format(
+                    file_name=file_name,
+                    settings=ZORG_AGENDA_FILES
+                )
+            )
+            continue
+
+        match_found = False
+        for match_file_name in glob.iglob(file_name):
+            if match_file_name not in unique:
+                result.append(match_file_name)
+                unique.add(match_file_name)
+            match_found = True
+
+        if not match_found:
+            agenda_output.add_warning(
+                "Cannot find `{file_name}' from `{setting}'"
+                .format(file_name=file_name, setting=ZORG_AGENDA_FILES)
+            )
+    return result
+
+
 class ZorgTodoList(sublime_plugin.TextCommand):
     def run(self, edit, show_in="quick_panel"):
         view = self.view
@@ -897,16 +934,29 @@ class ZorgTodoList(sublime_plugin.TextCommand):
 
         settings = sublime.load_settings("zorgmode.sublime-settings")
         zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+        zorg_agenda_files = expand_file_list(zorg_agenda_files, agenda_output)
+
+        if not zorg_agenda_files:
+            # TODO: documentation reference
+            agenda_output.add_warning(
+                "Cannot find nonempty `{option_name}' in settings."
+                .format(option_name=ZORG_AGENDA_FILES)
+            )
 
         for file_name in zorg_agenda_files:
             try:
-                inf = open(file_name)
-            except:
-                # TODO: print warning
+                with open(file_name) as inf:
+                    text = inf.read()
+            except Exception as e:
+                agenda_output.add_warning(
+                    "Error occurred while reading file `{file_name}': {error}"
+                    .format(
+                        file_name=file_name,
+                        error=str(e)
+                    )
+                )
                 continue
-
-            with inf:
-                text_view = TextView(inf.read(), file_name)
+            text_view = TextView(text, file_name)
 
             org_root = parse_org_document_new(text_view, view_get_full_region(text_view))
             for headline in iter_tree_depth_first(org_root):
