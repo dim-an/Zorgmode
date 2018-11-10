@@ -86,7 +86,7 @@ When cursor is over headline =zorg_cycle= (Linux: =Tab=) folds/unfolds correspon
 ** Hyperlinks
 You can insert links in your document. Link can be in one of two forms:
   1. =https://github.com/dim-an/zorgmode=
-  2. =[[https://github.com/dim-an/zorgmode]]=)
+  2. =[[https://github.com/dim-an/zorgmode]]=
   3. =[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]=
 
 To follow a link you should place cursor over it use =zorg_follow_link= (Linux: =Enter=).
