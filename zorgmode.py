@@ -130,6 +130,14 @@ def view_get_full_region(v):
     return cls(0, v.size())
 
 
+def find_view_by_id(view_id):
+    for window in sublime.windows():
+        for view in window.views():
+            if view.id() == view_id:
+                return view
+    return None
+
+
 class OrgmodeStructure(object):
     SectionInfo = collections.namedtuple(
         'SectionInfo',
@@ -915,7 +923,7 @@ def expand_file_list(file_list, agenda_output):
 
 
 class ZorgTodoList(sublime_plugin.TextCommand):
-    def run(self, edit, show_in="quick_panel"):
+    def run(self, edit, show_in="quick_panel", zorg_agenda_files=None):
         view = self.view
 
         zorg_syntax = get_zorgmode_syntax()
@@ -932,9 +940,10 @@ class ZorgTodoList(sublime_plugin.TextCommand):
 
         agenda_output = Agenda()
 
-        settings = sublime.load_settings("zorgmode.sublime-settings")
-        zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
-        zorg_agenda_files = expand_file_list(zorg_agenda_files, agenda_output)
+        if zorg_agenda_files is None:
+            settings = sublime.load_settings("zorgmode.sublime-settings")
+            zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
+            zorg_agenda_files = expand_file_list(zorg_agenda_files, agenda_output)
 
         if not zorg_agenda_files:
             # TODO: documentation reference
@@ -943,10 +952,14 @@ class ZorgTodoList(sublime_plugin.TextCommand):
                 .format(option_name=ZORG_AGENDA_FILES)
             )
 
-        for file_name in zorg_agenda_files:
+        def get_view_for_system_file(file_name):
             try:
+                v = window.find_open_file(file_name)
+                if v is not None:
+                    return v
                 with open(file_name) as inf:
-                    text = inf.read()
+                    t = inf.read()
+                return TextView(t, file_name)
             except Exception as e:
                 agenda_output.add_warning(
                     "Error occurred while reading file `{file_name}': {error}"
@@ -955,10 +968,30 @@ class ZorgTodoList(sublime_plugin.TextCommand):
                         error=str(e)
                     )
                 )
-                continue
-            text_view = TextView(text, file_name)
+                return None
 
-            org_root = parse_org_document_new(text_view, view_get_full_region(text_view))
+        def get_view_for_special_file(file_name):
+            m = re.match("/dev/sublimetext_view/(\d+)$", file_name)
+            if not m:
+                agenda_output.add_warning("Bad file: {}".format(file_name))
+                return None
+            view_id = int(m.group(1))
+            v = find_view_by_id(view_id)
+            if v is None:
+                agenda_output.add_warning("Cannot find the view with index {} for file {}".format(view_id, file_name))
+                return None
+            return v
+
+        for file_name in zorg_agenda_files:
+            if file_name.startswith("/dev/sublimetext_view/"):
+                # Special case useful for tests when we get text from already opened view
+                file_view = get_view_for_special_file(file_name)
+            else:
+                file_view = get_view_for_system_file(file_name)
+            if file_view is None:
+                continue
+
+            org_root = parse_org_document_new(file_view, view_get_full_region(file_view))
             for headline in iter_tree_depth_first(org_root):
                 if not isinstance(headline, OrgHeadline):
                     continue
@@ -1029,8 +1062,8 @@ class ZorgAgendaGoto(sublime_plugin.TextCommand):
 
             # Перейти на начало соответствующей строки
             group_idx, _ = window.get_view_index(file_view)
-            window.focus_group(group_idx)
             window.focus_view(file_view)
+            window.focus_group(group_idx)
 
             goto(file_view, best_region.a)
 
