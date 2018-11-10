@@ -55,6 +55,7 @@ class ZorgTestCase(TestCase):
     def setUp(self):
         self.active_views_before_test = set(v.id() for v in sublime.active_window().views())
         self.view = sublime.active_window().new_file()
+        self.maxDiff = None
 
     def tearDown(self):
         current_active_views = list(sublime.active_window().views())
