@@ -27,7 +27,6 @@ from .zorg_view_parse import (
     is_point_within_region,
     iter_tree_depth_first,
     next_sibling,
-    parse_org_document,
     parse_org_document_new,
     prev_sibling,
 )
@@ -497,7 +496,7 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
         view = self.view
         current_filename = view.file_name()
 
-        org_root = parse_org_document(view, sublime.Region(0, view.size()))
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
 
         archive_template = None
         cursor = view_get_cursor_point(view)
@@ -593,7 +592,7 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         }
 
         # Find all link expansion rules in current file
-        org_root = parse_org_document(view, sublime.Region(0, view.size()))
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
         link_expansion_rules = build_link_expansion_rules(org_root)
 
         try:
@@ -603,12 +602,12 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
             return
         schema = url.split(":", 1)[0]
         if schema in ref_handlers:
-            ref_handlers[schema](view, url)
+            ref_handlers[schema](view, org_root, url)
         else:
-            self.follow_header_link(view, url)
+            self.follow_header_link(view, org_root, url)
 
     @staticmethod
-    def open_in_browser(_, url):
+    def open_in_browser(_view, _org_root, url):
         webbrowser.open_new(url)
 
     @staticmethod
@@ -628,23 +627,21 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
             raise RuntimeError("Expansion limit exceeded, while expanding url: {}".format(original_url))
 
     @staticmethod
-    def open_file(view, url):
+    def open_file(view, _org_root, url):
         file_path = url.split(':', 1)[-1]  # strip scheme
         file_path = os.path.expanduser(file_path)
         window = view.window()
         window.open_file(file_path)
 
     @staticmethod
-    def open_sys_file(_, url):
+    def open_sys_file(_view, _org_root, url):
         file_path = url.split(':', 1)[-1]  # strip scheme
         file_path = os.path.expanduser(file_path)
         # TODO: нужно сделать для других типов файлов
         subprocess.check_call(['xdg-open', file_path])
 
     @staticmethod
-    def follow_header_link(view, caption):
-        org_root = parse_org_document(view, sublime.Region(0, view.size()))
-
+    def follow_header_link(view, org_root, caption):
         offset = None
         for item in iter_tree_depth_first(org_root):
             if not isinstance(item, OrgHeadline):
@@ -871,7 +868,7 @@ class ZorgTodoList(sublime_plugin.TextCommand):
             if file_view is None:
                 continue
 
-            org_root = parse_org_document(file_view, view_get_full_region(file_view))
+            org_root = parse_org_document_new(file_view, view_get_full_region(file_view))
             for headline in iter_tree_depth_first(org_root):
                 if not isinstance(headline, OrgHeadline):
                     continue

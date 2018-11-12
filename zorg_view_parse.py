@@ -91,19 +91,6 @@ def view_full_lines(view, region):
     return line_region_list
 
 
-def parse_org_document(view, region):
-    # 1. Получить список линий начиная с позиции
-    full_line_region_list = view_full_lines(view, region)
-
-    # 2. скармливать их пока не нажрёмся.
-    parser = OrgGlobalScopeParser(view)
-    for line_region in full_line_region_list:
-        if not parser.try_push_line(line_region):
-            break
-
-    return parser.finish()
-
-
 def parse_org_document_new(view, region):
     builder = OrgTreeBuilder(view)
     parser_input = ParserInput(view, region)
@@ -381,110 +368,6 @@ def parse_list(parser_input: ParserInput, builder: OrgTreeBuilder):
         parser_input.next_line()
 
 
-class OrgGlobalScopeParser(object):
-    def __init__(self, view):
-        root = OrgRoot(view)
-        section = OrgSection(view, root, 0)
-        self._root = root
-        self._stack = [root, section]
-        self._view = view
-
-    def try_push_line(self, region):
-        line = self._view.substr(region)
-        line = line.rstrip('\n')
-        m = HEADLINE_RE.match(line)
-        if m is not None:
-            headline_level = len(m.group(1))
-            assert headline_level > 0
-            while (
-                not isinstance(self._stack[-1], OrgSection)
-                or self._stack[-1].level >= headline_level
-            ):
-                self._stack.pop()
-
-            new_section = OrgSection(self._view, self._stack[-1], headline_level)
-            headline = OrgHeadline(self._view, new_section, headline_level)
-            self._stack.append(new_section)
-            _extend_region(headline, region)
-            return True
-
-        m = CONTROL_LINE_RE.match(line)
-        if m is not None:
-            control_line = OrgControlLine(self._view, self._root)
-            _extend_region(control_line, region)
-            return True
-
-        _extend_region(self._stack[-1], region)
-        return True
-
-    def finish(self):
-        self._stack = None
-        return self._root
-
-
-class OrgListParser(object):
-    def __init__(self, view):
-        self._result = OrgRoot(view)
-        self._stack = [self._result]
-        self._view = view
-        self._empty_lines = 0
-
-    def try_push_line(self, region):
-        line = self._view.substr(region)
-
-        if line.startswith("*"):
-            return False
-
-        line_is_empty = not bool(line.strip())
-        if line_is_empty:
-            self._empty_lines += 1
-            return bool(self._empty_lines < 2)
-        else:
-            self._empty_lines = 0
-
-        indent = _calc_indent(line)
-        m = LIST_ENTRY_BEGIN_RE.match(line)
-        if m is not None:
-            while (
-                self._stack[-1].node_type != "root"
-                and (
-                    isinstance(self._stack[-1], OrgList) and self._stack[-1].indent > indent
-                    or isinstance(self._stack[-1], OrgListEntry) and self._stack[-1].indent >= indent
-                )
-            ):
-                self._stack.pop()
-                assert self._stack
-
-            if (
-                not isinstance(self._stack[-1], OrgList)
-                or self._stack[-1].indent < indent
-            ):
-                self._stack.append(OrgList(self._view, self._stack[-1], indent))
-
-            self._stack.append(OrgListEntry(self._view, self._stack[-1], indent))
-            _extend_region(self._stack[-1], region)
-            return True
-
-        while (
-            self._stack
-            and not (
-                isinstance(self._stack[-1], OrgListEntry)
-                and self._stack[-1].indent < indent)
-        ):
-            self._stack.pop()
-
-        if not self._stack:
-            return False
-
-        assert isinstance(self._stack[-1], OrgListEntry)
-        _extend_region(self._stack[-1], region)
-        return True
-    
-    def finish(self):
-        self._stack = None
-        return self._result
-
-
 #
 # Details
 #
@@ -608,7 +491,7 @@ if __name__ == '__main__':
                 "*** more headlines 7 :tag1:tag2:\n"
             )
 
-            root = parse_org_document(view, mock_sublime.Region(0, view.size()))
+            root = parse_org_document_new(view, mock_sublime.Region(0, view.size()))
 
             headline_item_list = []
             for item in iter_tree_depth_first(root):
@@ -637,7 +520,7 @@ if __name__ == '__main__':
                 "#+BEGIN_SRC\n"
                 "#+END_SRC\n"
             )
-            root = parse_org_document(view, mock_sublime.Region(0, view.size()))
+            root = parse_org_document_new(view, mock_sublime.Region(0, view.size()))
 
             all_control_key_value_list = []
             for item in iter_tree_depth_first(root):
