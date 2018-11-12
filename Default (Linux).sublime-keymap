@@ -65,6 +65,14 @@
         }]
     },
     {
+        "keys": ["ctrl+x"],
+        "command": "zorg_cut_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        }]
+    },
+    {
         "keys": ["alt+shift+right"],
         "command": "zorg_toggle_checkbox",
         "context": [{

@@ -22,6 +22,7 @@ from .zorg_view_parse import (
     OrgControlLine,
     OrgHeadline,
     OrgListParser,
+    OrgListEntry,
     OrgSection,
 
     find_child_containing_point,
@@ -30,7 +31,8 @@ from .zorg_view_parse import (
     is_point_within_region,
     iter_tree_depth_first,
     next_sibling,
-    parse_org_document as parse_org_document_new,
+    parse_org_document,
+    parse_org_document_new,
     prev_sibling,
 )
 
@@ -136,6 +138,17 @@ def find_view_by_id(view_id):
             if view.id() == view_id:
                 return view
     return None
+
+
+def view_get_line_region(view, point=None):
+    if point is None:
+        point = view_get_cursor_point(view)
+    return view.line(point)
+
+
+def view_get_line_text(view, point=None):
+    region = view_get_line_region(view, point)
+    return view.substr(region)
 
 
 class OrgmodeStructure(object):
@@ -572,6 +585,22 @@ class ZorgCycleAll(sublime_plugin.TextCommand):
             view.fold(top_headers_folding)
 
 
+class ZorgCutNode(sublime_plugin.TextCommand):
+    def run(self, edit):
+        cur_line_region = view_get_line_region(self.view)
+
+        org_root = parse_org_document_new(self.view, sublime.Region(0, self.view.size()))
+        for node in iter_tree_depth_first(org_root):
+            if not isinstance(node, (OrgSection, OrgListEntry)):
+                continue
+            if cur_line_region.a == node.region.a and cur_line_region.b <= node.region.b:
+                selection = self.view.sel()
+                selection.clear()
+                selection.add(node.region)
+                self.view.run_command("cut")
+                return
+
+
 class ZorgMoveNodeUp(sublime_plugin.TextCommand):
     def run(self, edit):
         structure = OrgmodeStructure(self.view)
@@ -628,7 +657,7 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
         view = self.view
         current_filename = view.file_name()
 
-        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+        org_root = parse_org_document(view, sublime.Region(0, view.size()))
 
         archive_template = None
         cursor = view_get_cursor_point(view)
@@ -763,7 +792,7 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
 
     @staticmethod
     def follow_header_link(view, caption):
-        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+        org_root = parse_org_document(view, sublime.Region(0, view.size()))
 
         offset = None
         for item in iter_tree_depth_first(org_root):
@@ -991,7 +1020,7 @@ class ZorgTodoList(sublime_plugin.TextCommand):
             if file_view is None:
                 continue
 
-            org_root = parse_org_document_new(file_view, view_get_full_region(file_view))
+            org_root = parse_org_document(file_view, view_get_full_region(file_view))
             for headline in iter_tree_depth_first(org_root):
                 if not isinstance(headline, OrgHeadline):
                     continue

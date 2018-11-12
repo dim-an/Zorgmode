@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import contextlib
 import re
 import sys
 
@@ -26,6 +27,14 @@ KEYWORD_SET = frozenset(["TODO", "DONE"])
 
 def is_point_within_region(point, region):
     return region.a <= point < region.b
+
+
+def line_is_list_entry_begin(line_text):
+    return LIST_ENTRY_BEGIN_RE.match(line_text)
+
+
+def line_is_headline(line_text):
+    return HEADLINE_RE.match(line_text)
 
 
 def iter_tree_depth_first(node):
@@ -91,6 +100,15 @@ def parse_org_document(view, region):
             break
 
     return parser.finish()
+
+
+def parse_org_document_new(view, region):
+    builder = OrgTreeBuilder(view)
+    parser_input = ParserInput(view, region)
+
+    parse_global_scope(parser_input, builder)
+
+    return builder.finish()
 
 
 class OrgViewNode(object):
@@ -200,6 +218,153 @@ def org_control_line_get_key_value(control_line: OrgControlLine):
     m = CONTROL_LINE_RE.match(line)
     assert m is not None
     return m.group(1), m.group(2)
+
+
+class OrgTreeBuilder:
+    def __init__(self, view):
+        self._root = OrgRoot(view)
+        section = OrgSection(view, self._root, 0)
+        self._stack = [self._root, section]
+        self._context_stack = [2]
+
+    def top(self):
+        return self._stack[-1]
+
+    def pop(self):
+        self._stack.pop()
+
+    def push(self, node):
+        self._stack.append(node)
+
+    def finish(self):
+        self._stack = None
+        return self._root
+
+    @contextlib.contextmanager
+    def push_context(self):
+        curlen = len(self._stack)
+        self._context_stack.append(curlen)
+        yield
+        self._context_stack.pop()
+        if len(self._stack) > curlen:
+            del self._stack[curlen:]
+
+    def is_context_empty(self):
+        return len(self._stack) <= self._context_stack[-1]
+
+
+class ParserInput:
+    def __init__(self, view, region):
+        self._full_line_region_list = view_full_lines(view, region)
+        self._idx = 0
+        self.view = view
+
+    def get_current_line_region(self):
+        if self._idx < len(self._full_line_region_list):
+            return self._full_line_region_list[self._idx]
+        else:
+            return None
+
+    def next_line(self):
+        self._idx += 1
+
+
+def parse_global_scope(parser_input: ParserInput, builder: OrgTreeBuilder):
+    view = parser_input.view
+    while parser_input.get_current_line_region() is not None:
+        region = parser_input.get_current_line_region()
+        line = view.substr(region)
+        line = line.rstrip('\n')
+        m = HEADLINE_RE.match(line)
+        if m is not None:
+            headline_level = len(m.group(1))
+            assert headline_level > 0
+            while (
+                    not isinstance(builder.top(), OrgSection)
+                    or builder.top().level >= headline_level
+            ):
+                builder.pop()
+
+            new_section = OrgSection(view, builder.top(), headline_level)
+            headline = OrgHeadline(view, new_section, headline_level)
+            builder.push(new_section)
+            _extend_region(headline, region)
+            parser_input.next_line()
+            continue
+
+        m = CONTROL_LINE_RE.match(line)
+        if m is not None:
+            control_line = OrgControlLine(view, builder.top())
+            _extend_region(control_line, region)
+            parser_input.next_line()
+            continue
+
+        m = LIST_ENTRY_BEGIN_RE.match(line)
+        if m is not None:
+            with builder.push_context():
+                parse_list(parser_input, builder)
+            continue
+
+        _extend_region(builder.top(), region)
+        parser_input.next_line()
+        continue
+
+
+def parse_list(parser_input: ParserInput, builder: OrgTreeBuilder):
+    view = parser_input.view
+    empty_lines = 0
+    while parser_input.get_current_line_region() is not None:
+        region = parser_input.get_current_line_region()
+        line = view.substr(region)
+
+        if line.startswith("*"):
+            break
+
+        line_is_empty = not bool(line.strip())
+        if line_is_empty:
+            empty_lines += 1
+            if empty_lines >= 2:
+                return
+            parser_input.next_line()
+            continue
+        else:
+            empty_lines = 0
+
+        indent = _calc_indent(line)
+        m = LIST_ENTRY_BEGIN_RE.match(line)
+        if m is not None:
+            while (
+                isinstance(builder.top(), OrgList) and builder.top().indent > indent
+                or isinstance(builder.top(), OrgListEntry) and builder.top().indent >= indent
+            ):
+                builder.pop()
+
+            if (
+                not isinstance(builder.top(), OrgList)
+                or builder.top().indent < indent
+            ):
+                builder.push(OrgList(view, builder.top(), indent))
+
+            builder.push(OrgListEntry(view, builder.top(), indent))
+            _extend_region(builder.top(), region)
+            parser_input.next_line()
+            continue
+
+        while (
+            not builder.is_context_empty()
+            and not (
+                isinstance(builder.top(), OrgListEntry)
+                and builder.top().indent < indent
+            )
+        ):
+            builder.pop()
+
+        if builder.is_context_empty():
+            return
+
+        assert isinstance(builder.top(), OrgListEntry)
+        _extend_region(builder.top(), region)
+        parser_input.next_line()
 
 
 class OrgGlobalScopeParser(object):
