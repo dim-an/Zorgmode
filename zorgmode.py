@@ -36,7 +36,6 @@ try:
 except ImportError:
     history_list_plugin = None
 
-MAX_HEADLINE_LEVEL = 30
 ZORG_AGENDA_FILES = "zorg_agenda_files"
 ZORGMODE_SUBLIME_SETTINGS = "zorgmode.sublime-settings"
 
@@ -818,7 +817,7 @@ class ZorgTodoList(sublime_plugin.TextCommand):
         agenda_output = Agenda()
 
         if zorg_agenda_files is None:
-            settings = sublime.load_settings("zorgmode.sublime-settings")
+            settings = sublime.load_settings(ZORGMODE_SUBLIME_SETTINGS)
             zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
             zorg_agenda_files = expand_file_list(zorg_agenda_files, agenda_output)
 
@@ -966,7 +965,7 @@ class ZorgAgendaListAddFile(sublime_plugin.TextCommand):
             if file_name is None:
                 raise ZorgmodeFatalError("Cannot add file without name to zorg_agenda_list")
             file_name = os.path.abspath(file_name)
-            settings = sublime.load_settings("zorgmode.sublime-settings")
+            settings = sublime.load_settings(ZORGMODE_SUBLIME_SETTINGS)
             zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
 
             new_zorg_agenda_files = []
@@ -978,7 +977,7 @@ class ZorgAgendaListAddFile(sublime_plugin.TextCommand):
             if dest == "end":
                 new_zorg_agenda_files.append(file_name)
             settings.set(ZORG_AGENDA_FILES, new_zorg_agenda_files)
-            sublime.save_settings("zorgmode.sublime-settings")
+            sublime.save_settings(ZORGMODE_SUBLIME_SETTINGS)
         except ZorgmodeError as e:
             sublime.status_message(str(e))
         except ZorgmodeFatalError as e:
@@ -990,7 +989,7 @@ class ZorgAgendaListRemoveFile(sublime_plugin.TextCommand):
         return is_agenda_list_command_visible(self.view)
 
     def is_enabled(self):
-        settings = sublime.load_settings("zorgmode.sublime-settings")
+        settings = sublime.load_settings(ZORGMODE_SUBLIME_SETTINGS)
         zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
         return self.view.file_name() is not None and os.path.abspath(self.view.file_name()) in zorg_agenda_files
 
@@ -1001,7 +1000,7 @@ class ZorgAgendaListRemoveFile(sublime_plugin.TextCommand):
             if file_name is None:
                 raise ZorgmodeFatalError("Cannot add file without name to zorg_agenda_list")
             file_name = os.path.abspath(file_name)
-            settings = sublime.load_settings("zorgmode.sublime-settings")
+            settings = sublime.load_settings(ZORGMODE_SUBLIME_SETTINGS)
             zorg_agenda_files = settings.get(ZORG_AGENDA_FILES, [])
 
             new_zorg_agenda_files = []
@@ -1009,7 +1008,7 @@ class ZorgAgendaListRemoveFile(sublime_plugin.TextCommand):
                 if f != file_name:
                     new_zorg_agenda_files.append(f)
             settings.set(ZORG_AGENDA_FILES, new_zorg_agenda_files)
-            sublime.save_settings("zorgmode.sublime-settings")
+            sublime.save_settings(ZORGMODE_SUBLIME_SETTINGS)
         except ZorgmodeError as e:
             sublime.status_message(str(e))
         except ZorgmodeFatalError as e:
