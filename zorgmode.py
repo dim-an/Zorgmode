@@ -140,11 +140,6 @@ def view_get_line_region(view, point=None):
     return view.line(point)
 
 
-def view_get_line_text(view, point=None):
-    region = view_get_line_region(view, point)
-    return view.substr(region)
-
-
 def cycle_todo_state(view, edit, forward=True):
     status_list = ['', 'TODO', 'DONE']
     if len(view.sel()) != 1:
@@ -205,23 +200,6 @@ def is_straight_region(region_to_fold):
     return region_to_fold.a < region_to_fold.b
 
 
-def find_all_in_region(view, expr, region):
-    invalid_region = sublime.Region(-1, -1)
-    result = []
-    pos = region.a
-    while True:
-        match_region = view.find(expr, pos)
-        if match_region == invalid_region:
-            break
-        if not region.contains(match_region):
-            break
-        if match_region.a <= pos != region.a:
-            break
-        result.append(match_region)
-        pos = match_region.b
-    return result
-
-
 class ZorgCycle(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
@@ -256,27 +234,22 @@ class ZorgCycle(sublime_plugin.TextCommand):
             view.unfold(region_to_fold)
 
 
-def find_all_headers(view, min_level=1, max_level=1000):
-    whole_file_region = sublime.Region(0, view.size())
-    return find_all_in_region(view, "^[*]{{{},{}}}\s[^\n]*$".format(min_level, max_level), whole_file_region)
+def before_line_end(view, pos):
+    if (
+        0 < pos <= view.size()
+        and bool(view.classify(pos - 1) & sublime.CLASS_LINE_END)
+    ):
+        return pos - 1
+    else:
+        return pos
 
 
-def get_header_level(string):
-    if not string:
-        raise ValueError("string is not a headline")
-    i = None
-    for i, c in enumerate(string):
-        if c != '*':
-            break
-    return i
-
-
-def get_folding_for_headers(view, header_region_list):
+def get_folding_for_headers(view, header_region_iter):
     prev_header_end = None
     result = []
-    for header_region in itertools.chain(header_region_list, [sublime.Region(view.size() + 1, view.size() + 1)]):
+    for header_region in itertools.chain(header_region_iter, [sublime.Region(view.size() + 1, view.size() + 1)]):
         if prev_header_end is not None:
-            fold_region = sublime.Region(prev_header_end, header_region.a - 1)
+            fold_region = sublime.Region(before_line_end(view, prev_header_end), header_region.a - 1)
             assert fold_region.a <= fold_region.b
             if not fold_region.empty():
                 result.append(fold_region)
@@ -374,39 +347,43 @@ def swap_regions(view, edit, region1, region2):
 
 class ZorgCycleAll(sublime_plugin.TextCommand):
     def run(self, edit):
-        view = self.view
-        if len(view.sel()) != 1:
-            return
-        sel, = view.sel()
-        if not sel.empty():
-            return
+        try:
+            view = self.view
+            view_get_cursor_point(view)
 
-        all_headers = find_all_headers(view)
-        if not all_headers:
-            return
-        # the first header we see is top header
-        top_header_max_level = get_header_level(view.substr(all_headers[0]))
-        top_level_headers = find_all_headers(view, max_level=top_header_max_level)
-        assert top_level_headers, "top_level_headers must at least contain first header of all_headers"
-        top_headers_folding = get_folding_for_headers(view, top_level_headers)
-        all_headers_folding = get_folding_for_headers(view, all_headers)
+            org_root = parse_org_document_new(view, view_get_full_region(view))
 
-        folded_regions = view.folded_regions()
+            headline_list = [
+                n
+                for n in iter_tree_depth_first(org_root)
+                if isinstance(n, OrgHeadline)
+            ]
+            if not headline_list:
+                return
 
-        # TODO: кажется можно просто сказать view.unfold(folded_regions)
-        # но сначала нужно написать тесты
-        for region in folded_regions:
-            view.unfold(region)
+            # The first header we see is top header.
+            # NOTE: if first header has level > 1 we will show all headers that satisfy condition:
+            #   1 <= header_level <= first_header_level
+            # Such behaviour complies to Emacs.
+            top_headline_max_level = headline_list[0].level
+            top_headers_folding = get_folding_for_headers(
+                view,
+                (h.region for h in headline_list if h.level <= top_headline_max_level)
+            )
+            all_headers_folding = get_folding_for_headers(view, (h.region for h in headline_list))
 
-        if folded_regions == all_headers_folding:
-            # unfolded region
-            pass
-        elif folded_regions == top_headers_folding:
-            # fold all_headers_folding
-            view.fold(all_headers_folding)
-        else:
-            # fold top_headers_folding
-            view.fold(top_headers_folding)
+            folded_regions = view.folded_regions()
+
+            view.unfold(folded_regions)
+            if folded_regions == all_headers_folding:
+                # unfolded region
+                pass
+            elif folded_regions == top_headers_folding:
+                view.fold(all_headers_folding)
+            else:
+                view.fold(top_headers_folding)
+        except ZorgmodeError as e:
+            sublime.status_message(str(e))
 
 
 def find_node_starting_at_line(view, type_list, line_pos=None):
