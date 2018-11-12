@@ -58,24 +58,26 @@ def find_child_containing_point(node, point):
     return node
 
 
-def sibling(node, offset):
+def sibling(node, offset, sibling_type_filter=None):
     if node.parent is None:
         return None
     siblings = node.parent.children
+    if sibling_type_filter:
+        siblings = [s for s in siblings if isinstance(s, sibling_type_filter)]
     idx = siblings.index(node)
     if idx == -1:
         raise AssertionError("Cannot find node in the list of its parent children")
-    if not (0 <= idx + offset < len(siblings)):
-        return None
-    return siblings[idx + offset]
+    if 0 <= idx + offset < len(siblings):
+        return siblings[idx + offset]
+    return None
 
 
-def next_sibling(node):
-    return sibling(node, 1)
+def next_sibling(node, sibling_type_filter=None):
+    return sibling(node, 1, sibling_type_filter)
 
     
-def prev_sibling(node):
-    return sibling(node, -1)
+def prev_sibling(node, sibling_type_filter=None):
+    return sibling(node, -1, sibling_type_filter)
 
 
 def view_full_lines(view, region):
@@ -127,7 +129,13 @@ class OrgViewNode(object):
         text = _node_text(self)
         if len(text) > 55:
             text = "{} ... {}".format(text[:25], text[-25:])
-        return "{cls}({str_repr})".format(cls=type(self).__name__, str_repr=repr(text))
+        attrs = self._debug_attrs()
+        if attrs != "":
+            attrs += ", "
+        return "{cls}({attrs}{str_repr})".format(cls=type(self).__name__, attrs=attrs, str_repr=repr(text))
+
+    def _debug_attrs(self):
+        return ""
 
     def debug_print(self, indent=None, file=None):
         if file is None:
@@ -156,6 +164,9 @@ class OrgSection(OrgViewNode):
         super(OrgSection, self).__init__(view, parent)
         self.level = level
 
+    def _debug_attrs(self):
+        return "level={}".format(self.level)
+
 
 class OrgHeadline(OrgViewNode):
     node_type = "headline"
@@ -163,6 +174,9 @@ class OrgHeadline(OrgViewNode):
     def __init__(self, view, parent, level):
         super(OrgHeadline, self).__init__(view, parent)
         self.level = level
+
+    def _debug_attrs(self):
+        return "level={}".format(self.level)
 
 
 def org_headline_get_text(headline: OrgHeadline):

@@ -17,15 +17,11 @@ from .mock_sublime import (
 )
 
 from .zorg_view_parse import (
-    LIST_ENTRY_BEGIN_RE,
-
     OrgControlLine,
     OrgHeadline,
-    OrgListParser,
     OrgListEntry,
     OrgSection,
 
-    find_child_containing_point,
     org_control_line_get_key_value,
     org_headline_get_text,
     is_point_within_region,
@@ -159,12 +155,6 @@ class OrgmodeStructure(object):
     def __init__(self, view):
         self.view = view
 
-    def is_cursor_over_list_entry(self):
-        view = self.view
-
-        current_line = view.substr(self.get_line_region())
-        return LIST_ENTRY_BEGIN_RE.match(current_line)
-
     def get_cursor_point(self):
         return view_get_cursor_point(self.view)
 
@@ -173,91 +163,6 @@ class OrgmodeStructure(object):
         if point is None:
             point = self.get_cursor_point()
         return view.line(point)
-
-    def parse_current_org_list(self):
-        view = self.view
-
-        view_size = view.size()
-
-        # 1. Нужно получить список строк исходного файла.
-        line_region_list = view.lines(sublime.Region(0, view_size))
-        for region in line_region_list:
-            # We want our regions to include trailing '\n'
-            if region.b != view_size:
-                region.b += 1
-
-        current_line_index, _ = view.rowcol(self.get_cursor_point())
-
-        # 2. Нужно идти назад пока не будем уверены, что списка дальше нет.
-        before_org_list_start = current_line_index - 1
-        empty_line_count = 0
-        while before_org_list_start >= 0:
-            line = view.substr(line_region_list[before_org_list_start])
-            line_is_empty = not line.strip()
-            if line_is_empty:
-                empty_line_count += 1
-                if empty_line_count >= 2:
-                    break
-            else:
-                empty_line_count = 0
-
-            if line.startswith(" ") or LIST_ENTRY_BEGIN_RE.match(line) or line_is_empty:
-                before_org_list_start -= 1
-                continue
-            break
-
-        # 3. Нужно идти вперёд пока не найдём начало списка.
-        org_list_start = before_org_list_start + 1
-        while org_list_start < len(line_region_list):
-            line = view.substr(line_region_list[org_list_start])
-            if LIST_ENTRY_BEGIN_RE.match(line):
-                break
-            org_list_start += 1
-        else:
-            raise ZorgmodeError("Cursor is not positioned over list entry")
-
-        # 4. Нужно распарсить лист.
-        parser = OrgListParser(view)
-        line_idx = org_list_start
-        while (
-                line_idx < len(line_region_list)
-                and parser.try_push_line(line_region_list[line_idx])
-        ):
-            line_idx += 1
-        return parser.finish()
-
-    def get_list_entry_info(self, point=None):
-        view = self.view
-        current_line_region = self.get_line_region(point=point)
-        current_line = view.substr(current_line_region)
-        match = re.search(r'^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+', current_line)
-        if match is None:
-            return
-
-    def get_section_info(self, point=None):
-        view = self.view
-        current_line_region = self.get_line_region(point=point)
-        current_line = view.substr(current_line_region)
-        match = re.search(r'^\s*(([-+*]|[*]+)\s)(\s*\w+\b\s*|\s*)?', current_line)
-        if match is None:
-            return
-        current_headline_region = current_line_region
-        current_headline_level = get_header_level(view.substr(current_headline_region))
-
-        next_headline_re = '^[*]{{1,{}}}\s'.format(current_headline_level)
-        next_headline_region = view.find(next_headline_re, current_headline_region.b)
-        section_end = next_headline_region.a
-        if section_end <= current_headline_region.a:
-            section_end = view.size()
-
-        return self.SectionInfo(
-            headline_region=current_headline_region,
-            headline_level=current_headline_level,
-            section_region=sublime.Region(current_headline_region.a, section_end),
-            content_region=sublime.Region(current_headline_region.b, section_end))
-
-    def find_all_headlines(self, min_level=1, max_level=MAX_HEADLINE_LEVEL):
-        return find_all_headers(self.view, min_level=min_level, max_level=max_level)
 
     # TODO: переименовать special_lines в control_lines
     def iter_special_lines(self, line_tag):
@@ -308,6 +213,12 @@ def cycle_todo_state(view, edit, forward=True):
     if next_status != '':
         next_status += ' '
     view.replace(edit, status_region, next_status)
+
+
+class ZorgDebugPrint(sublime_plugin.TextCommand):
+    def run(self, edit):
+        org_root = parse_org_document_new(self.view, sublime.Region(0, self.view.size()))
+        org_root.debug_print()
 
 
 class ZorgCycleTodoStateForward(sublime_plugin.TextCommand):
@@ -491,63 +402,6 @@ def swap_regions(view, edit, region1, region2):
     view.fold(region_to_refold_list)
 
 
-def move_current_list_entry(view, edit, up=True):
-    # TODO: factorize
-    if len(view.sel()) != 1 or not view.sel()[0].empty():
-        return
-
-    # найти текущий элемент списка
-    orgmode_structure = OrgmodeStructure(view)
-    org_list_node = orgmode_structure.parse_current_org_list()
-
-    child = find_child_containing_point(org_list_node, orgmode_structure.get_cursor_point())
-    if up:
-        sibling = prev_sibling(child)
-    else:
-        sibling = next_sibling(child)
-
-    if sibling is None:
-        return
-
-    swap_regions(view, edit, child.region, sibling.region)
-    view.show(view.sel()[0].a)
-
-
-def move_current_section(view, edit, up=True):
-    if len(view.sel()) != 1 or not view.sel()[0].empty():
-        return
-
-    orgmode_structure = OrgmodeStructure(view)
-    # Найти текущую ноду
-    current_section_info = orgmode_structure.get_section_info()
-    current_headline_level = current_section_info.headline_level
-
-    # Понять её уровень
-    # Найти все ноды уровня нашей ноды или выше
-    all_headlines = orgmode_structure.find_all_headlines(max_level=current_headline_level)
-
-    current_headline_index = all_headlines.index(current_section_info.headline_region)
-
-    if up:
-        swap_headline_index = current_headline_index - 1
-    else:
-        swap_headline_index = current_headline_index + 1
-
-    if swap_headline_index < 0 or swap_headline_index >= len(all_headlines):
-        return
-
-    # Найти предыдущую ноду (если это нода уровнем выше, огорчиться и выйти)
-    swap_headline_region = all_headlines[swap_headline_index]
-    if get_header_level(view.substr(swap_headline_region)) < current_headline_level:
-        return
-
-    current_section_region = current_section_info.section_region
-    swap_section_region = orgmode_structure.get_section_info(point=swap_headline_region.a).section_region
-
-    swap_regions(view, edit, current_section_region, swap_section_region)
-    view.show(view.sel()[0].a)
-
-
 class ZorgCycleAll(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
@@ -585,38 +439,53 @@ class ZorgCycleAll(sublime_plugin.TextCommand):
             view.fold(top_headers_folding)
 
 
+def find_node_starting_at_line(view, type_list, line_pos=None):
+    cur_line_region = view_get_line_region(view, line_pos)
+
+    org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+    for node in iter_tree_depth_first(org_root):
+        if not isinstance(node, type_list):
+            continue
+        if cur_line_region.a == node.region.a and cur_line_region.b <= node.region.b:
+            return node
+    return None
+
+
 class ZorgCutNode(sublime_plugin.TextCommand):
     def run(self, edit):
-        cur_line_region = view_get_line_region(self.view)
+        node = find_node_starting_at_line(self.view, (OrgSection, OrgListEntry))
+        if node is None:
+            return
+        selection = self.view.sel()
+        selection.clear()
+        selection.add(node.region)
+        self.view.run_command("cut")
 
-        org_root = parse_org_document_new(self.view, sublime.Region(0, self.view.size()))
-        for node in iter_tree_depth_first(org_root):
-            if not isinstance(node, (OrgSection, OrgListEntry)):
-                continue
-            if cur_line_region.a == node.region.a and cur_line_region.b <= node.region.b:
-                selection = self.view.sel()
-                selection.clear()
-                selection.add(node.region)
-                self.view.run_command("cut")
-                return
+
+def move_current_node(view, edit, up=True):
+    node = find_node_starting_at_line(view, (OrgSection, OrgListEntry))
+    if not node:
+        return
+    if up:
+        sibling = prev_sibling(node, type(node))
+    else:
+        sibling = next_sibling(node, type(node))
+
+    if sibling is None:
+        return
+
+    swap_regions(view, edit, node.region, sibling.region)
+    view.show(view.sel()[0].a)
 
 
 class ZorgMoveNodeUp(sublime_plugin.TextCommand):
     def run(self, edit):
-        structure = OrgmodeStructure(self.view)
-        if structure.is_cursor_over_list_entry():
-            move_current_list_entry(self.view, edit, up=True)
-        else:
-            move_current_section(self.view, edit, up=True)
+        move_current_node(self.view, edit, up=True)
 
 
 class ZorgMoveNodeDown(sublime_plugin.TextCommand):
     def run(self, edit):
-        structure = OrgmodeStructure(self.view)
-        if structure.is_cursor_over_list_entry():
-            move_current_list_entry(self.view, edit, up=False)
-        else:
-            move_current_section(self.view, edit, up=False)
+        move_current_node(self.view, edit, up=False)
 
 
 class ZorgToggleCheckbox(sublime_plugin.TextCommand):
