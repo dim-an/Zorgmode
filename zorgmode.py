@@ -147,34 +147,6 @@ def view_get_line_text(view, point=None):
     return view.substr(region)
 
 
-class OrgmodeStructure(object):
-    SectionInfo = collections.namedtuple(
-        'SectionInfo',
-        ['headline_region', 'headline_level', 'section_region', 'content_region'])
-
-    def __init__(self, view):
-        self.view = view
-
-    def get_cursor_point(self):
-        return view_get_cursor_point(self.view)
-
-    def get_line_region(self, point=None):
-        view = self.view
-        if point is None:
-            point = self.get_cursor_point()
-        return view.line(point)
-
-    # TODO: переименовать special_lines в control_lines
-    def iter_special_lines(self, line_tag):
-        if not re.match("^[A-Za-z0-9_]*$", line_tag):
-            raise ValueError("Bad line tag: {}".format(line_tag))
-
-        regexp = "^#[+]{}: *(.*) *$".format(line_tag)
-        text = self.view.substr(sublime.Region(0, self.view.size()))
-        for match in re.finditer(regexp, text, flags=re.MULTILINE):
-            yield match.group(1)
-
-
 def cycle_todo_state(view, edit, forward=True):
     status_list = ['', 'TODO', 'DONE']
     if len(view.sel()) != 1:
@@ -491,8 +463,7 @@ class ZorgMoveNodeDown(sublime_plugin.TextCommand):
 class ZorgToggleCheckbox(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
-        orgmode_structure = OrgmodeStructure(view)
-        line_region = orgmode_structure.get_line_region()
+        line_region = view_get_line_region(view)
         if not line_region:
             return
         line_text = view.substr(line_region)
@@ -577,16 +548,33 @@ class ZorgMoveToArchive(sublime_plugin.TextCommand):
         sublime.status_message("Entry is archived to `{}'".format(archive_filename))
 
 
+def build_link_expansion_rules(org_root):
+    link_expansion_rules = {}
+    for item in iter_tree_depth_first(org_root):
+        if not isinstance(item, OrgControlLine):
+            continue
+        key, value = org_control_line_get_key_value(item)
+        if key == "LINK":
+            fields = value.split(None, 1)
+            if len(fields) != 2:
+                sublime.status_message("Bad link line: {}".format(item.text()))
+                continue
+            abbreviation, replacement = fields
+            if abbreviation in link_expansion_rules:
+                sublime.status_message("Link abbreviation `{}' is used multiple times".format(abbreviation))
+            link_expansion_rules[abbreviation] = replacement
+    return link_expansion_rules
+
+
 class ZorgFollowLink(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
 
         # нужно найти ссылку, внутри которой мы находимся
-        orgmode_structure = OrgmodeStructure(view)
-        line_region = orgmode_structure.get_line_region()
+        line_region = view_get_line_region(view)
         line = view.substr(line_region)
         link_list = find_links_in_string(line)
-        cursor_point = orgmode_structure.get_cursor_point()
+        cursor_point = view_get_cursor_point(view)
         cursor_in_line = cursor_point - line_region.a
 
         for link_info in link_list:
@@ -603,8 +591,13 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
             'file': self.open_file,
             'file+sys': self.open_sys_file,
         }
+
+        # Find all link expansion rules in current file
+        org_root = parse_org_document(view, sublime.Region(0, view.size()))
+        link_expansion_rules = build_link_expansion_rules(org_root)
+
         try:
-            url = self.expand_url(orgmode_structure, current_link.reference)
+            url = self.expand_url(link_expansion_rules, current_link.reference)
         except RuntimeError as e:
             sublime.status_message(str(e))
             return
@@ -619,27 +612,16 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
         webbrowser.open_new(url)
 
     @staticmethod
-    def expand_url(orgmode_structure, url):
+    def expand_url(link_expansion_rules, url):
         original_url = url
-
-        expansion_rules = {}
-        for special_line in orgmode_structure.iter_special_lines("LINK"):
-            fields = special_line.split(None, 1)
-            if len(fields) != 2:
-                sublime.status_message("Bad link line: {}".format(special_line))
-                continue
-            abbreviation, replacement = fields
-            if abbreviation in expansion_rules:
-                sublime.status_message("Link abbreviation `{}' is used multiple times".format(abbreviation))
-            expansion_rules[abbreviation] = replacement
 
         for i in range(30):
             fields = url.split(":", 1)
             if len(fields) != 2:
                 return url
             schema, rest = fields
-            if schema in expansion_rules:
-                url = expansion_rules[schema] % rest
+            if schema in link_expansion_rules:
+                url = link_expansion_rules[schema] % rest
             else:
                 return url
         else:
