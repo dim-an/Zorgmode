@@ -637,7 +637,7 @@ class ZorgFollowLink(sublime_plugin.TextCommand):
     def open_sys_file(_view, _org_root, url):
         file_path = url.split(':', 1)[-1]  # strip scheme
         file_path = os.path.expanduser(file_path)
-        # TODO: нужно сделать для других типов файлов
+        # TODO: нужно сделать для других операционных систем
         subprocess.check_call(['xdg-open', file_path])
 
     @staticmethod
