@@ -29,24 +29,9 @@ class TestMoveHeader(ZorgTestCase):
         self.view.run_command('zorg_cycle_all')
         self.assert_proper_folding()
 
-    def test_overview(self):
-        set_active_view_text(
-            "some stuff\n"
-            "** Caption{\n"
-            "some text}\n"
-            "*** Other caption{\n"
-            "more text}\n"
-            "** Caption 2{\n"
-            "even more text\n"
-            "}\n"
-            "* Caption 3{\n"
-            "text text text}\n"
-            "** Caption 4{\n\n}"
-        )
-        set_active_view_cursor_position(1, 2)
         self.view.run_command('zorg_cycle_all')
         self.view.run_command('zorg_cycle_all')
-        self.assert_proper_folding()
+        self.assertEqual(self.view.folded_regions(), [])
 
     def test_overview(self):
         set_active_view_text(
@@ -66,6 +51,9 @@ class TestMoveHeader(ZorgTestCase):
         self.view.run_command('zorg_cycle_all')
         self.view.run_command('zorg_cycle_all')
         self.assert_proper_folding()
+
+        self.view.run_command('zorg_cycle_all')
+        self.assertEqual(self.view.folded_regions(), [])
 
     def assert_proper_folding(self):
         expected_folding = []
