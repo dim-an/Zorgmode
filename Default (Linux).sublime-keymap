@@ -73,6 +73,22 @@
         }]
     },
     {
+        "keys": ["ctrl+c"],
+        "command": "zorg_copy_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+k"],
+        "command": "zorg_delete_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        }]
+    },
+    {
         "keys": ["alt+shift+right"],
         "command": "zorg_toggle_checkbox",
         "context": [{

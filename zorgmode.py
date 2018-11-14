@@ -180,18 +180,18 @@ def cycle_todo_state(view, edit, forward=True):
     view.replace(edit, status_region, next_status)
 
 
-class ZorgDebugPrint(sublime_plugin.TextCommand):
+class ZorgDebugPrintCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         org_root = parse_org_document_new(self.view, sublime.Region(0, self.view.size()))
         org_root.debug_print()
 
 
-class ZorgCycleTodoStateForward(sublime_plugin.TextCommand):
+class ZorgCycleTodoStateForwardCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=True)
 
 
-class ZorgCycleTodoStateBackward(sublime_plugin.TextCommand):
+class ZorgCycleTodoStateBackwardCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         return cycle_todo_state(self.view, edit, forward=False)
 
@@ -200,7 +200,7 @@ def is_straight_region(region_to_fold):
     return region_to_fold.a < region_to_fold.b
 
 
-class ZorgCycle(sublime_plugin.TextCommand):
+class ZorgCycleCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         if len(view.sel()) != 1:
@@ -345,7 +345,7 @@ def swap_regions(view, edit, region1, region2):
     view.fold(region_to_refold_list)
 
 
-class ZorgCycleAll(sublime_plugin.TextCommand):
+class ZorgCycleAllCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         try:
             view = self.view
@@ -398,7 +398,7 @@ def find_node_starting_at_line(view, type_list, line_pos=None):
     return None
 
 
-class ZorgCutNode(sublime_plugin.TextCommand):
+class ZorgCutNodeCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         node = find_node_starting_at_line(self.view, (OrgSection, OrgListEntry))
         if node is None:
@@ -407,6 +407,31 @@ class ZorgCutNode(sublime_plugin.TextCommand):
         selection.clear()
         selection.add(node.region)
         self.view.run_command("cut")
+
+
+class ZorgDeleteNodeCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        node = find_node_starting_at_line(self.view, (OrgSection, OrgListEntry))
+        if node is None:
+            return
+        selection = self.view.sel()
+        selection.clear()
+        selection.add(node.region)
+        self.view.run_command("right_delete")
+
+
+class ZorgCopyNodeCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        node = find_node_starting_at_line(self.view, (OrgSection, OrgListEntry))
+        if node is None:
+            return
+        selection = self.view.sel()
+        old = list(selection)
+        selection.clear()
+        selection.add(node.region)
+        self.view.run_command("copy")
+        selection.clear()
+        selection.add_all(old)
 
 
 def move_current_node(view, edit, up=True):
@@ -425,17 +450,17 @@ def move_current_node(view, edit, up=True):
     view.show(view.sel()[0].a)
 
 
-class ZorgMoveNodeUp(sublime_plugin.TextCommand):
+class ZorgMoveNodeUpCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=True)
 
 
-class ZorgMoveNodeDown(sublime_plugin.TextCommand):
+class ZorgMoveNodeDownCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         move_current_node(self.view, edit, up=False)
 
 
-class ZorgToggleCheckbox(sublime_plugin.TextCommand):
+class ZorgToggleCheckboxCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
         line_region = view_get_line_region(view)
@@ -456,7 +481,7 @@ class ZorgToggleCheckbox(sublime_plugin.TextCommand):
         view.replace(edit, tick_region, next_tick)
 
 
-class ZorgMoveToArchive(sublime_plugin.TextCommand):
+class ZorgMoveToArchiveCommand(sublime_plugin.TextCommand):
     def run(self, edit, silent=False):
         try:
             self.run_impl(edit)
@@ -541,7 +566,7 @@ def build_link_expansion_rules(org_root):
     return link_expansion_rules
 
 
-class ZorgFollowLink(sublime_plugin.TextCommand):
+class ZorgFollowLinkCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         view = self.view
 
@@ -775,7 +800,7 @@ def expand_file_list(file_list, agenda_output):
     return result
 
 
-class ZorgTodoList(sublime_plugin.TextCommand):
+class ZorgTodoListCommand(sublime_plugin.TextCommand):
     def run(self, edit, show_in="quick_panel", zorg_agenda_files=None):
         view = self.view
 
@@ -878,7 +903,7 @@ def agenda_meta_info_get_or_create_view(window: sublime.Window, meta_info: Agend
     raise ZorgmodeError("Cannot find file for this item")
 
 
-class ZorgAgendaGoto(sublime_plugin.TextCommand):
+class ZorgAgendaGotoCommand(sublime_plugin.TextCommand):
     def run(self, edit):
         try:
             agenda_view = self.view
@@ -931,7 +956,7 @@ def is_agenda_list_command_visible(view):
     )
 
 
-class ZorgAgendaListAddFile(sublime_plugin.TextCommand):
+class ZorgAgendaListAddFileCommand(sublime_plugin.TextCommand):
     def is_visible(self):
         return is_agenda_list_command_visible(self.view)
 
@@ -961,7 +986,7 @@ class ZorgAgendaListAddFile(sublime_plugin.TextCommand):
             sublime.error_message(str(e))
 
 
-class ZorgAgendaListRemoveFile(sublime_plugin.TextCommand):
+class ZorgAgendaListRemoveFileCommand(sublime_plugin.TextCommand):
     def is_visible(self):
         return is_agenda_list_command_visible(self.view)
 
