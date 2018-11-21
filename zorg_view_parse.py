@@ -28,6 +28,16 @@ BEGIN_SRC_RE = re.compile(
 END_SRC_RE = re.compile(
     r"^\#\+END_SRC\b.*$"
 )
+
+BEGIN_EXAMPLE_RE = re.compile(
+    r"^\#\+BEGIN_EXAMPLE\b.*$"
+)
+END_EXAMPLE_RE = re.compile(
+    r"^\#\+END_EXAMPLE\b.*$"
+)
+COLON_LINE_EXAMPLE_RE = re.compile(
+    r"^\s*:.*$"
+)
 KEYWORD_SET = frozenset(["TODO", "DONE"])
 
 
@@ -311,8 +321,19 @@ def parse_global_scope(parser_input: ParserInput, builder: OrgTreeBuilder):
         m = BEGIN_SRC_RE.match(line)
         if m is not None:
             with builder.push_context():
-                parse_src(parser_input, builder)
+                parse_example_block(parser_input, builder, BEGIN_EXAMPLE_RE, END_EXAMPLE_RE)
             continue
+
+        m = BEGIN_EXAMPLE_RE.match(line)
+        if m is not None:
+            with builder.push_context():
+                parse_example_block(parser_input, builder, BEGIN_EXAMPLE_RE, END_EXAMPLE_RE)
+            continue
+
+        m = COLON_LINE_EXAMPLE_RE.match(line)
+        if m is not None:
+            with builder.push_context():
+                parse_example_block(parser_input, builder, COLON_LINE_EXAMPLE_RE)
 
         m = CONTROL_LINE_RE.match(line)
         if m is not None:
@@ -383,13 +404,13 @@ def parse_list(parser_input: ParserInput, builder: OrgTreeBuilder):
         parser_input.next_line()
 
 
-def parse_src(parser_input: ParserInput, builder: OrgTreeBuilder):
+def parse_example_block(parser_input: ParserInput, builder: OrgTreeBuilder, begin_re, end_re):
     view = parser_input.view
     region = parser_input.get_current_line_region()
     if region is None:
         return
     line = view.substr(region)
-    m = BEGIN_SRC_RE.match(line)
+    m = begin_re.match(line)
     if m is None:
         return
     src_block = OrgSrcBlock(view, builder.top())
@@ -404,11 +425,15 @@ def parse_src(parser_input: ParserInput, builder: OrgTreeBuilder):
         line = view.substr(region)
         _extend_region(src_block, region)
         parser_input.next_line()
-        m = END_SRC_RE.match(line)
-        if m is not None:
-            break
+        if end_re is None:
+            m = begin_re.match(line)
+            if m is None:
+                break
+        else:
+            m = end_re.match(line)
+            if m is not None:
+                break
     builder.pop()
-
 
 #
 # Details

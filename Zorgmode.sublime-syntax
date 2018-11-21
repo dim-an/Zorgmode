@@ -9,18 +9,21 @@ contexts:
     main:
         - include: expect_agenda
         - include: expect_headline
-        - include: expect_list_entry
+        - include: expect_org_text
         - include: expect_link
         - include: expect_special_line
-        - include: expect_src
 
     expect_list_entry:
         - match: '^(\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+'
           push: list_entry
     
+    expect_org_text:
+        - include: expect_link
+        - include: expect_src
+
     list_entry:
         - meta_scope: entry.list.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
           pop: true
 
@@ -38,31 +41,31 @@ contexts:
 
     headline1:
         - meta_scope: heading.1.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
-          pop: true 
+          pop: true
 
     headline2:
         - meta_scope: heading.2.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
-          pop: true 
+          pop: true
 
     headline3:
         - meta_scope: heading.3.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
-          pop: true 
+          pop: true
 
     headline4:
         - meta_scope: heading.4.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
           pop: true
 
     headline5p:
         - meta_scope: heading.5p.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '(\n)?$'
           pop: true
 
@@ -91,7 +94,7 @@ contexts:
                 (
                   (?:[^\[\]]|\\\[|\\\])*
                 )
-              \]\]        
+              \]\]
             )
           captures:
             0: link.text.org
@@ -109,19 +112,287 @@ contexts:
           scope: special_line.text.org
 
     expect_src:
-        - match: '^#\+BEGIN_SRC\s+(py|python)\s*'
+        - match: '^\s*#\+BEGIN_SRC\s+(bash)\s*\n'
           scope: special_line
-          embed: Packages/Python/Python.sublime-syntax
-          escape : '^#\+END_SRC\s*'
+          embed: Packages/ShellScript/Bash.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
           escape_captures:
             0: special_line
 
-        - match: '^#\+BEGIN_SRC\s+(c\+\+|cpp|cxx)\s*'
+        - match: '^\s*#\+BEGIN_SRC\s+(C|c)\s*\n'
           scope: special_line
-          embed: Packages/C++/C++.sublime-syntax
-          escape : '^#\+END_SRC\s*'
+          embed: Packages/C++/C.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
           escape_captures:
             0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(c\+\+|cpp|cxx|C\+\+|CPP|CXX)\s*\n'
+          scope: special_line
+          embed: Packages/C++/C++.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(c#|C#|cs)\s*\n'
+          scope: special_line
+          embed: Packages/C#/C#.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(clj)\s*\n'
+          scope: special_line
+          embed: Packages/Clojure/Clojure.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(css)\s*\n'
+          scope: special_line
+          embed: Packages/CSS/CSS.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(d)\s*\n'
+          scope: special_line
+          embed: Packages/D/D.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(diff)\s*\n'
+          scope: special_line
+          embed: Packages/Diff/Diff.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(erl)\s*\n'
+          scope: special_line
+          embed: Packages/Erlang/Erlang.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(go)\s*\n'
+          scope: special_line
+          embed: Packages/Go/Go.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(hs|haskell)\s*\n'
+          scope: special_line
+          embed: Packages/Haskell/Haskell.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(java)\s*\n'
+          scope: special_line
+          embed: Packages/Java/Java.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(js|JavaScript)\s*\n'
+          scope: special_line
+          embed: Packages/JavaScript/JavaScript.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(lisp)\s*\n'
+          scope: special_line
+          embed: Packages/Lisp/Lisp.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(lua)\s*\n'
+          scope: special_line
+          embed: Packages/Lua/Lua.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(make)\s*\n'
+          scope: special_line
+          embed: Packages/Makefile/Makefile.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(md|Markdown)\s*\n'
+          scope: special_line
+          embed: Packages/Markdown/Markdown.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(ocaml)\s*\n'
+          scope: special_line
+          embed: Packages/OCaml/OCaml.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(org)\s*\n'
+          scope: special_line
+          embed: Packages/Zorgmode/Zorgmode.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(perl)\s*\n'
+          scope: special_line
+          embed: Packages/Perl/Perl.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(php)\s*\n'
+          scope: special_line
+          embed: Packages/PHP/PHP.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(python|py)\s*\n'
+          scope: special_line
+          embed: Packages/Python/Python.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(r)\s*\n'
+          scope: special_line
+          embed: Packages/R/R.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(rs|rust)\s*\n'
+          scope: special_line
+          embed: Packages/Rust/Rust.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(rst)\s*\n'
+          scope: special_line
+          embed: Packages/RestructuredText/reStructuredText.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(rb)\s*\n'
+          scope: special_line
+          embed: Packages/Ruby/Ruby.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(scala)\s*\n'
+          scope: special_line
+          embed: Packages/Scala/Scala.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(sh)\s*\n'
+          scope: special_line
+          embed: Packages/ShellScript/Shell-Unix-Generic.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(sql)\s*\n'
+          scope: special_line
+          embed: Packages/SQL/SQL.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(tcl)\s*\n'
+          scope: special_line
+          embed: Packages/TCL/Tcl.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(xml)\s*\n'
+          scope: special_line
+          embed: Packages/XML/XML.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC\s+(yml)\s*\n'
+          scope: special_line
+          embed: Packages/YAML/YAML.sublime-syntax
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_SRC.*\n'
+          scope: special_line
+          embed: verbatim
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_SRC\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*#\+BEGIN_EXAMPLE.*\n'
+          scope: special_line
+          embed: verbatim
+          embed_scope: markup.raw
+          escape : '^\s*#\+END_EXAMPLE\s*'
+          escape_captures:
+            0: special_line
+
+        - match: '^\s*:.*\n'
+          scope: markup.raw
+        
+        - match: '[~][^~]*[~]'
+          scope: markup.raw
+        
+
+    verbatim:
+        - meta_scope: text.plain
 
 
     expect_agenda:
@@ -129,18 +400,19 @@ contexts:
           scope: special_line
           push: inside_agenda
 
+
     inside_agenda:
         - match: '^\s*TODO:'
           push: inside_agenda_item
         - match: '#\+WARNING: .*$'
           scope: warning.agenda.text.org
-        - include: expect_link
+        - include: expect_org_text
         - match: '^#\+END_AGENDA$'
           scope: special_line
           pop: true
 
     inside_agenda_item:
       - meta_scope: item.agenda.text.org
-      - include: expect_link
+      - include: expect_org_text
       - match: '$'
         pop: true
