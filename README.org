@@ -122,7 +122,7 @@ Commands =zorg_cycle_todo_state_forward= (Linux: =Alt+Shift+Right=) and =zorg_cy
 ** Archive
 Once you are done with your project you can move it to archive using =zorg_move_to_archive= (Linux: =Ctrl+Shift+A=). Archive filename is current filename with =_archive= suffix appended to it.
 
-** Source code and example inclusion
+** Source code and examples
 There are multiple ways to include example or source code in your .org document:
   1. You can use ~#+BEGIN_EXAMPLE~ ~#+END_EXAMPLE~ markers:
     : this is example inside org text:
