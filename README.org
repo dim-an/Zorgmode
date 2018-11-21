@@ -3,7 +3,7 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 [[https://travis-ci.org/dim-an/Zorgmode/][file:https://travis-ci.org/dim-an/Zorgmode.svg?branch=master]]
 
 * Installation
-: # Go to Packages directory (you can find one using menu =Preferences= -> =Browse Packages=).
+: # Go to Packages directory (you can find it using menu Preferences → Browse Packages).
 : cd /path/to/package/directory
 : git clone git@github.com:dim-an/Zorgmode.git
 
