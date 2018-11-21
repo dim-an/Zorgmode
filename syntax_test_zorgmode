@@ -58,3 +58,21 @@ Some text
 
 #+ARCHIVE: foobar
 # <- special_line.text.org
+
+#+BEGIN_SRC
+# <- special_line
+foobar
+# <- markup.raw
+* Not a Title
+# <- markup.raw
+#+END_SRC
+# <- special_line
+
+  #+BEGIN_SRC py
+    def foo(): 
+  # <- source.python
+  # <- markup.raw
+  #+END_SRC py
+
+: $ git clone
+# <- markup.raw
