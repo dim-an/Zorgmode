@@ -37,7 +37,8 @@ except ImportError:
     history_list_plugin = None
 
 ZORG_AGENDA_FILES = "zorg_agenda_files"
-ZORGMODE_SUBLIME_SETTINGS = "zorgmode.sublime-settings"
+ZORGMODE_SUBLIME_SETTINGS = "Zorgmode.sublime-settings"
+ZORGMODE_SUBLIME_SYNTAX = "Zorgmode.sublime-syntax"
 
 OrgLinkInfo = collections.namedtuple("OrgLinkInfo", "start,end,reference,text")
 
@@ -739,7 +740,7 @@ AGENDA_REGISTRY = AgendaRegistry()
 
 
 def get_zorgmode_syntax():
-    lst = sublime.find_resources("zorgmode.sublime-syntax")
+    lst = sublime.find_resources(ZORGMODE_SUBLIME_SYNTAX)
     if not lst:
         return None
     return lst[0]
@@ -806,7 +807,7 @@ class ZorgTodoListCommand(sublime_plugin.TextCommand):
 
         zorg_syntax = get_zorgmode_syntax()
         if zorg_syntax is None:
-            sublime.status_message("Cannot find zorgmode syntax file. Probably zorgmode is not installed correctly")
+            sublime.status_message("Cannot find Zorgmode syntax file. Probably Zorgmode is not installed correctly")
             return
 
         output_cls = {
@@ -952,7 +953,7 @@ class ZorgAgendaGotoCommand(sublime_plugin.TextCommand):
 def is_agenda_list_command_visible(view):
     return (
         view.file_name() is not None
-        and view.settings().get("syntax").endswith("zorgmode.sublime-syntax")
+        and view.settings().get("syntax").endswith("Zorgmode.sublime-syntax")
     )
 
 

@@ -22,6 +22,12 @@ CONTROL_LINE_RE = re.compile(
     "\s* (.*)",  # value
     re.VERBOSE
 )
+BEGIN_SRC_RE = re.compile(
+    r"^\#\+BEGIN_SRC\b.*$"
+)
+END_SRC_RE = re.compile(
+    r"^\#\+END_SRC\b.*$"
+)
 KEYWORD_SET = frozenset(["TODO", "DONE"])
 
 
@@ -165,6 +171,9 @@ class OrgHeadline(OrgViewNode):
     def _debug_attrs(self):
         return "level={}".format(self.level)
 
+class OrgSrcBlock(OrgViewNode):
+    node_type = "src_block"
+
 
 def org_headline_get_text(headline: OrgHeadline):
     line = headline.view.substr(headline.region)
@@ -293,17 +302,23 @@ def parse_global_scope(parser_input: ParserInput, builder: OrgTreeBuilder):
             parser_input.next_line()
             continue
 
+        m = LIST_ENTRY_BEGIN_RE.match(line)
+        if m is not None:
+            with builder.push_context():
+                parse_list(parser_input, builder)
+            continue
+
+        m = BEGIN_SRC_RE.match(line)
+        if m is not None:
+            with builder.push_context():
+                parse_src(parser_input, builder)
+            continue
+
         m = CONTROL_LINE_RE.match(line)
         if m is not None:
             control_line = OrgControlLine(view, builder.top())
             _extend_region(control_line, region)
             parser_input.next_line()
-            continue
-
-        m = LIST_ENTRY_BEGIN_RE.match(line)
-        if m is not None:
-            with builder.push_context():
-                parse_list(parser_input, builder)
             continue
 
         _extend_region(builder.top(), region)
@@ -368,6 +383,33 @@ def parse_list(parser_input: ParserInput, builder: OrgTreeBuilder):
         parser_input.next_line()
 
 
+def parse_src(parser_input: ParserInput, builder: OrgTreeBuilder):
+    view = parser_input.view
+    region = parser_input.get_current_line_region()
+    if region is None:
+        return
+    line = view.substr(region)
+    m = BEGIN_SRC_RE.match(line)
+    if m is None:
+        return
+    src_block = OrgSrcBlock(view, builder.top())
+    builder.push(src_block)
+    _extend_region(src_block, region)
+    parser_input.next_line()
+
+    while True:
+        region = parser_input.get_current_line_region()
+        if region is None:
+            return
+        line = view.substr(region)
+        _extend_region(src_block, region)
+        parser_input.next_line()
+        m = END_SRC_RE.match(line)
+        if m is not None:
+            break
+    builder.pop()
+
+
 #
 # Details
 #
@@ -427,11 +469,7 @@ if __name__ == '__main__':
                 " - parent 2\n"
             )
 
-            parser = OrgListParser(view)
-            for region in view.sp_iter_all_line_regions():
-                result = parser.try_push_line(region)
-                self.assertTrue(result)
-            result = parser.finish()
+            result = parse_org_document_new(view, mock_sublime.Region(0, view.size()))
             self.assertEqual(len(result.children), 1)
             self.assertEqual(len(result.children[0].children), 2)
             self.assertEqual(_node_text(result.children[0].children[0]), " - parent 1\n   - child")

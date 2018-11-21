@@ -5,7 +5,7 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 * Installation
 : # Go to Packages directory (you can find one using menu =Preferences= -> =Browse Packages=).
 : cd /path/to/package/directory
-: git clone git@github.com:dim-an/zorgmode.git
+: git clone git@github.com:dim-an/Zorgmode.git
 
 * Short command overview
 |            Command             |   Keys (Linux)  |       Context        |                    Comment                    |
@@ -69,11 +69,11 @@ Headline that starts with TODO / DONE is a project, like this
 ** TODO Explain projects and checkboxes
 List item that starts with [ ] / [X] is a checkbox list item
  - [ ] unchecked list item
- - [X] checked list item    
+ - [X] checked list item
 #+END_SRC
 
 * Features
-Currently zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
+Currently Zorgmode doesn't provide all the features of [[https://orgmode.org/][emacs' org mode]] but it's quite usable.
 
 ** Cycle of visibility of sections
 When cursor is over headline =zorg_cycle= (Linux: =Tab=) folds/unfolds corresponding section.
@@ -85,9 +85,9 @@ When cursor is over headline =zorg_cycle= (Linux: =Tab=) folds/unfolds correspon
 
 ** Hyperlinks
 You can insert links in your document. Link can be in one of two forms:
-  1. =https://github.com/dim-an/zorgmode=
-  2. =[[https://github.com/dim-an/zorgmode]]=
-  3. =[[https://github.com/dim-an/zorgmode][Zorgmode homepage]]=
+  1. =https://github.com/dim-an/Zorgmode=
+  2. =[[https://github.com/dim-an/Zorgmode]]=
+  3. =[[https://github.com/dim-an/Zorgmode][Zorgmode homepage]]=
 
 To follow a link you should place cursor over it use =zorg_follow_link= (Linux: =Enter=).
 There are multiple types of links some of them will be opened using external application and others will be opened inside SublimeText.
@@ -103,7 +103,7 @@ Zorgmode supports multiple types of links:
 *** Link abbreviations
 You can create per document link abbreviations. To do this you should insert special line in any place of your document
 : #+LINK: gh-user https://github.com/%s
-Once line is inserted you can create links like this =[[gh-user:torvalds]]=. That link will be interpreted by zorgmode as =[[https://github.com/torvalds]]=.
+Once line is inserted you can create links like this =[[gh-user:torvalds]]=. That link will be interpreted by Zorgmode as =[[https://github.com/torvalds]]=.
 
 ** Structural editing
 =zorg_move_node_up= (Linux: =Ctrl+Shift+Up=) and =zorg_move_node_down= (Linux: =Ctrl+Shift+Down=) allows to swap current section or list item with its sibling.
@@ -121,6 +121,15 @@ Commands =zorg_cycle_todo_state_forward= (Linux: =Alt+Shift+Right=) and =zorg_cy
 
 ** Archive
 Once you are done with your project you can move it to archive using =zorg_move_to_archive= (Linux: =Ctrl+Shift+A=). Archive filename is current filename with =_archive= suffix appended to it.
+
+** Source code inclusion
+You can include code in other languages using ~BEGIN_SRC~ / ~END_SRC~ markers. For example:
+
+: #+BEGIN_SRC python
+: # this is python script
+: def function():
+:     return "bar"
+: #+END_SRC
 
 * Useful plugins
 [[https://packagecontrol.io/packages/Table%20Editor][SublimeTableEditor]] plugin can help you edit tables in your org files.

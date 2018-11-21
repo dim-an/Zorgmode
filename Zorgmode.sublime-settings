@@ -1,7 +1,7 @@
 {
     //
-    // Currently there is only one color scheme that supports zorgmode syntax :(
-    "color_scheme": "Packages/zorgmode/Color Scheme/Monokai.sublime-color-scheme",
+    // Currently there is only one color scheme that supports Zorgmode syntax :(
+    "color_scheme": "Packages/Zorgmode/Color Scheme/Monokai.sublime-color-scheme",
 
     //
     // `enable_table_editor` and `table_editor_syntax` are for TableEditor plugin.
@@ -23,7 +23,7 @@
 
     //
     // `zorg_agenda_files` contains a list of files that will be checked when
-    // zorgmode creates agenda.
+    // Zorgmode creates agenda.
     "zorg_agenda_files": [
         // ~/org/TODO.org,  // you can specify path to a file
         // ~/org/*.org,     // globs also work

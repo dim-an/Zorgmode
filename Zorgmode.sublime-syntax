@@ -3,7 +3,7 @@
 file_extensions: [org, org_archive]
 first_line_match: "^#[+][A-Z]+"
 scope: text.org
-name: zorgmode
+name: Zorgmode
 
 contexts:
     main:

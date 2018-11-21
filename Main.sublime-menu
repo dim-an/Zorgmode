@@ -65,7 +65,7 @@
                             {
                                 "command": "edit_settings", "args":
                                 {
-                                    "base_file": "${packages}/zorgmode/Default ($platform).sublime-keymap",
+                                    "base_file": "${packages}/Zorgmode/Default ($platform).sublime-keymap",
                                     "default": "[\n\t$0\n]\n"
                                 },
                                 "caption": "Key Bindings",
@@ -73,7 +73,7 @@
                             {
                                 "command": "edit_settings", "args":
                                 {
-                                    "base_file": "${packages}/zorgmode/zorgmode.sublime-settings",
+                                    "base_file": "${packages}/Zorgmode/Zorgmode.sublime-settings",
                                     "default": "// Check Default Zorgmode settings for list of available options\n{\n}\n"
                                 },
                                 "caption": "Settings"
@@ -81,7 +81,7 @@
                             { "caption": "-", "id": "help"},
                             {
                                 "command": "open_file",
-                                "args": {"file": "${packages}/zorgmode/README.org"},
+                                "args": {"file": "${packages}/Zorgmode/README.org"},
                                 "caption": "README"
                             }
                         ]
