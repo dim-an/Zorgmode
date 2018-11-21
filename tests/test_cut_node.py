@@ -41,3 +41,45 @@ class TestCutNode(ZorgTestCase):
             "  - foo\n"
             " + qux\n"
         )
+
+    def test_cut_section_with_example(self):
+        set_active_view_text(
+            "* Header 1\n"
+            "* Header 2\n"
+            "#+BEGIN_EXAMPLE\n"
+            "* This is actually not a header\n"
+            "#+END_EXAMPLE\n"
+            " #+BEGIN_EXAMPLE\n"
+            "* This is also not a header\n"
+            " #+END_EXAMPLE \n"
+            "* Header 3\n"
+
+        )
+        set_active_view_cursor_position(2, 1)
+        get_active_view().run_command("zorg_cut_node")
+        self.assertEqual(
+            get_active_view_text(),
+            "* Header 1\n"
+            "* Header 3\n"
+        )
+
+    def test_cut_section_with_src(self):
+        set_active_view_text(
+            "* Header 1\n"
+            "* Header 2\n"
+            "#+BEGIN_SRC\n"
+            "* This is actually not a header\n"
+            "#+END_SRC\n"
+            " #+BEGIN_SRC\n"
+            "* This is also not a header\n"
+            " #+END_SRC \n"
+            "* Header 3\n"
+
+        )
+        set_active_view_cursor_position(2, 1)
+        get_active_view().run_command("zorg_cut_node")
+        self.assertEqual(
+            get_active_view_text(),
+            "* Header 1\n"
+            "* Header 3\n"
+        )

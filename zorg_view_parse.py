@@ -23,17 +23,17 @@ CONTROL_LINE_RE = re.compile(
     re.VERBOSE
 )
 BEGIN_SRC_RE = re.compile(
-    r"^\#\+BEGIN_SRC\b.*$"
+    r"^\s*\#\+BEGIN_SRC\b.*$"
 )
 END_SRC_RE = re.compile(
-    r"^\#\+END_SRC\b.*$"
+    r"^\s*\#\+END_SRC\b.*$"
 )
 
 BEGIN_EXAMPLE_RE = re.compile(
-    r"^\#\+BEGIN_EXAMPLE\b.*$"
+    r"^\s*\#\+BEGIN_EXAMPLE\b.*$"
 )
 END_EXAMPLE_RE = re.compile(
-    r"^\#\+END_EXAMPLE\b.*$"
+    r"^\s*\#\+END_EXAMPLE\b.*$"
 )
 COLON_LINE_EXAMPLE_RE = re.compile(
     r"^\s*:.*$"
@@ -321,7 +321,7 @@ def parse_global_scope(parser_input: ParserInput, builder: OrgTreeBuilder):
         m = BEGIN_SRC_RE.match(line)
         if m is not None:
             with builder.push_context():
-                parse_example_block(parser_input, builder, BEGIN_EXAMPLE_RE, END_EXAMPLE_RE)
+                parse_example_block(parser_input, builder, BEGIN_SRC_RE, END_SRC_RE)
             continue
 
         m = BEGIN_EXAMPLE_RE.match(line)
