@@ -1,6 +1,6 @@
 env:
     global:
-        - PACKAGE="zorgmode" # Package name
+        - PACKAGE="Zorgmode" # Package name
         - SUBLIME_TEXT_VERSION="3"
         # use UNITTESTING_TAG to specific tag of UnitTesting
         # - UNITTESTING_TAG="master"
