@@ -10,7 +10,7 @@ contexts:
         - include: expect_agenda
         - include: expect_headline
         - include: expect_org_text
-        - include: expect_link
+        - include: expect_list_entry
         - include: expect_special_line
 
     expect_list_entry:
