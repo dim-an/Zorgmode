@@ -127,6 +127,7 @@ There are multiple ways to include example or source code in your .org document:
   1. You can use ~#+BEGIN_EXAMPLE~ ~#+END_EXAMPLE~ markers:
     : this is example inside org text:
     : #+BEGIN_EXAMPLE
+    : text of example
     : #+END_EXAMPLE
   2. If example is small you can start example line with colon:
     #+BEGIN_EXAMPLE
@@ -135,13 +136,11 @@ There are multiple ways to include example or source code in your .org document:
     #+END_EXAMPLE
   3.  Finaly you can use ~#+BEGIN_SRC~, ~#+END_SRC~ markers to include source code
       (and you can optionally specify what language is used):
-      #+BEGIN_EXAMPLE
-      This is code block:
-      #+BEGIN_SRC py
-      def func():
-        print("Hello world!\n")
-      #+END_SRC
-      #+END_EXAMPLE
+      : This is code block:
+      : #+BEGIN_SRC py
+      : def func():
+      :   print("Hello world!\n")
+      : #+END_SRC
       List of supported languages includes: bash, c, c++/cpp/cxx, c#/cs, css,
       d, diff, erl, go, hs/haskell, java, js/JavaScript, lua, make, md/Markdown,
       ocaml, org, perl, php, py/python, r, rs, rst, rb, scala, sh, sql, tcl, xml, yml.
