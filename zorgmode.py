@@ -24,6 +24,7 @@ from .zorg_view_parse import (
 
     org_control_line_get_key_value,
     org_headline_get_text,
+    org_list_entry_get_tick_position,
     is_point_within_region,
     iter_tree_depth_first,
     next_sibling,
@@ -462,24 +463,53 @@ class ZorgMoveNodeDownCommand(sublime_plugin.TextCommand):
 
 
 class ZorgToggleCheckboxCommand(sublime_plugin.TextCommand):
+    def get_region_list_for_toggle(self):
+        view = self.view
+        sel = view.sel()
+        result = []
+        for region in sel:
+            if region.a == region.b:
+                result.append(view_get_line_region(view, region.a))
+            else:
+                result.append(region)
+        return result
+
     def run(self, edit):
         view = self.view
-        line_region = view_get_line_region(view)
-        if not line_region:
+
+        region_list = self.get_region_list_for_toggle()
+        if not region_list:
+            # TODO: message
             return
-        line_text = view.substr(line_region)
+        org_root = parse_org_document_new(view, sublime.Region(0, view.size()))
+        replace_region_list = []
+        all_ticks_are_currently_x = True
+        for node in iter_tree_depth_first(org_root):
+            if not isinstance(node, OrgListEntry):
+                continue
+            tick_pos = org_list_entry_get_tick_position(node)
+            if tick_pos is None:
+                continue
+            if not any(r.contains(tick_pos) for r in region_list):
+                continue
+            tick_region = sublime.Region(
+                tick_pos,
+                tick_pos + 1
+            )
+            replace_region_list.append(tick_region)
+            tick_mark = view.substr(tick_region)
+            assert tick_mark in " -X"
+            if tick_mark != "X":
+                assert tick_mark in " -"
+                all_ticks_are_currently_x = False
 
-        match = re.match('^(?:\s+[*]|\s*[-+]|\s*[0-9]*[.]|\s[a-zA-Z][.])\s+\[(.)\].*$', line_text)
-        if not match:
-            return
+        if all_ticks_are_currently_x:
+            next_tick = " "
+        else:
+            next_tick = "X"
 
-        tick_region = sublime.Region(
-            line_region.a + match.start(1),
-            line_region.a + match.end(1))
-
-        tick_mark = view.substr(tick_region)
-        next_tick = {' ': 'X', 'X': ' '}.get(tick_mark, ' ')
-        view.replace(edit, tick_region, next_tick)
+        for tick_region in replace_region_list:
+            view.replace(edit, tick_region, next_tick)
 
 
 class ZorgMoveToArchiveCommand(sublime_plugin.TextCommand):

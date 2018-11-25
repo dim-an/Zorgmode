@@ -7,7 +7,20 @@ import sys
 
 # NOTE: this module doesn't import sublime module so we can mock view/region etc in tests
 
-LIST_ENTRY_BEGIN_RE = re.compile(r"^(\s+[*]|\s*[-+]|\s*[0-9]+[.]|\s[a-zA-Z][.])\s+")
+LIST_ENTRY_BEGIN_RE = re.compile(
+    r"""^(
+            \s+[*] |
+            \s*[-+] |
+            \s*[0-9]+[.] |
+            \s[a-zA-Z][.]
+        )\s+
+        (?:
+            (?P<tick_box>\[[- xX]\])
+            \s
+        )?
+        """,
+    re.VERBOSE
+)
 HEADLINE_RE = re.compile(
     '^([*]+) \s+'  # STARS group 1
     '(?: ([A-Za-z0-9]+)\s+ )?'  # KEYWORD group 2
@@ -221,9 +234,12 @@ class OrgList(OrgViewNode):
 class OrgListEntry(OrgViewNode):
     node_type = "list_entry"
 
-    def __init__(self, view, parent, indent):
+    def __init__(self, view, parent, indent, match):
         super(OrgListEntry, self).__init__(view, parent)
         self.indent = indent
+        self.tick_offset = None
+        if match.group("tick_box") is not None:
+            self.tick_offset = match.start("tick_box") + 1
 
 
 class OrgControlLine(OrgViewNode):
@@ -231,6 +247,14 @@ class OrgControlLine(OrgViewNode):
 
     def __init__(self, view, parent):
         super(OrgControlLine, self).__init__(view, parent)
+
+
+def org_list_entry_get_tick_position(node: OrgListEntry):
+    if node.region is None:
+        raise ValueError("OrgListEntry region is unknown")
+    elif node.tick_offset is None:
+        return None
+    return node.region.a + node.tick_offset
 
 
 def org_control_line_get_key_value(control_line: OrgControlLine):
@@ -382,7 +406,7 @@ def parse_list(parser_input: ParserInput, builder: OrgTreeBuilder):
             ):
                 builder.push(OrgList(view, builder.top(), indent))
 
-            builder.push(OrgListEntry(view, builder.top(), indent))
+            builder.push(OrgListEntry(view, builder.top(), indent, m))
             _extend_region(builder.top(), region)
             parser_input.next_line()
             continue
