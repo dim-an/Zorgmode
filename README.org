@@ -18,9 +18,9 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 | zorg_move_node_down            | ctrl+shift+down | headline, list item | moves current section (or list item) down                               |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
-| zorg_cycle_todo_state_forward  | alt+shift+right | project headline    | Cycles forward project state between (=TODO=, =DONE=, =<empty state>=)  |
+| zorg_cycle_todo_state_forward  | alt+shift+right | headline            | Cycles forward project state between (=TODO=, =DONE=, =<empty state>=)  |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
-| zorg_cycle_todo_state_backward | alt+shift+left  | todo headline       | Cycles backward project state between (=TODO=, =DONE=, =<empty state>=) |
+| zorg_cycle_todo_state_backward | alt+shift+left  | headline            | Cycles backward project state between (=TODO=, =DONE=, =<empty state>=) |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 | zorg_toggle_checkbox           | alt+shift+left  | checkbox list item  | toggles checkbox between unchecked (=[ ]=) and checked(=[X]=) states    |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
