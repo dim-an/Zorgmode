@@ -357,7 +357,7 @@ def parse_global_scope(parser_input: ParserInput, builder: OrgTreeBuilder):
         m = COLON_LINE_EXAMPLE_RE.match(line)
         if m is not None:
             with builder.push_context():
-                parse_example_block(parser_input, builder, COLON_LINE_EXAMPLE_RE)
+                parse_example_block(parser_input, builder, COLON_LINE_EXAMPLE_RE, None)
 
         m = CONTROL_LINE_RE.match(line)
         if m is not None:
