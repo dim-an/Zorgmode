@@ -8,31 +8,26 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 : git clone git@github.com:dim-an/Zorgmode.git
 
 * Short command overview
-|            Command             |   Keys (Linux)  |       Context        |                    Comment                    |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_cycle                     | tab             | - headline           | cycles through visibility of the current tree |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_cycle_all                 | shift+tab       | - <any>              | cycles through visibility of all trees        |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_move_node_up              | ctrl+shift+up   | - headline           | moves current section (or list item) up       |
-|                                |                 | - list item          |                                               |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_move_node_down            | ctrl+shift+down | - headline           | moves current section (or list item) down     |
-|                                |                 | - list item          |                                               |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_cycle_todo_state_forward  | alt+shift+right | - todo headline      | Cycles headline between todo item states      |
-|                                |                 |                      | (=TODO= / =DONE= / =<empty state>= ) forward. |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_cycle_todo_state_backward | alt+shift+left  | - todo headline      | Cycles headline between todo item states      |
-|                                |                 |                      | (=TODO= / =DONE= / =<empty state>=) backward. |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_toggle_checkbox           | alt+shift+left  | - checkbox list item | toggles checkbox between                      |
-|                                | alt+shift+right |                      | unchecked (=[ ]=) and checked(=[X]=) states   |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_follow_link               | enter           | - link               | follow link                                   |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
-| zorg_archive                   | ctrl+shift+A    | - headline           | move current section into archive             |
-|--------------------------------|-----------------|----------------------|-----------------------------------------------|
+|            Command             |   Keys (Linux)  |       Context       |                                 Comment                                 |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_cycle                     | tab             | headline            | cycles through visibility of the current tree                           |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_cycle_all                 | shift+tab       | any                 | cycles through visibility of all trees                                  |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_move_node_up              | ctrl+shift+up   | headline, list item | moves current section (or list item) up                                 |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_move_node_down            | ctrl+shift+down | headline, list item | moves current section (or list item) down                               |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_cycle_todo_state_forward  | alt+shift+right | project headline    | Cycles forward project state between (=TODO=, =DONE=, =<empty state>=)  |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_cycle_todo_state_backward | alt+shift+left  | todo headline       | Cycles backward project state between (=TODO=, =DONE=, =<empty state>=) |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_toggle_checkbox           | alt+shift+left  | checkbox list item  | toggles checkbox between unchecked (=[ ]=) and checked(=[X]=) states    |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_follow_link               | enter           | link                | follow link                                                             |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_archive                   | ctrl+shift+A    | headline            | move current section into archive                                       |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 
 * Org syntax crash course
 
