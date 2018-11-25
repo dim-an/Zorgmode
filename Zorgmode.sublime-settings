@@ -25,7 +25,7 @@
     // `zorg_agenda_files` contains a list of files that will be checked when
     // Zorgmode creates agenda.
     "zorg_agenda_files": [
-        // ~/org/TODO.org,  // you can specify path to a file
-        // ~/org/*.org,     // globs also work
+        // "~/org/TODO.org",  // you can specify path to a file
+        // "~/org/*.org",     // globs also work
     ],
 }
