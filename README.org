@@ -27,7 +27,7 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 |                                |                 |                      | (=TODO= / =DONE= / =<empty state>=) backward. |
 |--------------------------------+-----------------+----------------------+-----------------------------------------------|
 | zorg_toggle_checkbox           | alt+shift+left  | - checkbox list item | toggles checkbox between                      |
-|                                | alt+shift+right |                      | unchecked ([ ]) and checked([X]) states       |
+|                                | alt+shift+right |                      | unchecked (=[ ]=) and checked(=[X]=) states   |
 |--------------------------------+-----------------+----------------------+-----------------------------------------------|
 | zorg_follow_link               | enter           | - link               | follow link                                   |
 |--------------------------------+-----------------+----------------------+-----------------------------------------------|
