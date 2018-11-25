@@ -106,18 +106,29 @@ You can create per document link abbreviations. To do this you should insert spe
 Once line is inserted you can create links like this =[[gh-user:torvalds]]=. That link will be interpreted by Zorgmode as =[[https://github.com/torvalds]]=.
 
 ** Structural editing
-=zorg_move_node_up= (Linux: =Ctrl+Shift+Up=) and =zorg_move_node_down= (Linux: =Ctrl+Shift+Down=) allows to swap current section or list item with its sibling.
-Cursor must be positioned on the section headline or first line of list item.
+There are a number of commands that allow to swap, cut, copy or delete section or list entry.
+To use them cursor must be positioned on the headline of a section or on the first line of list item.
 
-** Todos and checkboxes
+=zorg_move_node_up= (Linux: =Ctrl+Shift+Up=) and =zorg_move_node_down= (Linux: =Ctrl+Shift+Down=) swaps section (or list item) with its sibling.
+=zorg_cut_node= (Linux: =Ctrl+x=) cuts section (or list item).
+=zorg_delete_node= (Linux =Ctrl+Shift+k=) deletes (section or list item).
+
+** Projects and checkbox lists
 Headlines that start with =TODO= or =DONE= keyword are projects.
-: * TODO Write documentation
+: * TODO Write Zorgmode documentation
 : ** DONE Explain org syntax
 : ** TODO Explain all the commands
-Commands =zorg_cycle_todo_state_forward= (Linux: =Alt+Shift+Right=) and =zorg_cycle_todo_state_backward= (Linux: =Alt+Shift+Left=) cycle between project states (cursor must be over project headline):
+Commands =zorg_cycle_todo_state_forward= (Linux: =Alt+Shift+Right=) and =zorg_cycle_todo_state_backward= (Linux: =Alt+Shift+Left=)
+cycle between project states (cursor must be over project headline):
   - =TODO=
   - =DONE=
   - empty state (not a project)
+
+Checkbox is a list item that starts with =[ ]= or =[X]=.
+: - [ ] Unchecked item.
+: - [X] Checked item.
+Command =zorg_toggle_checkbox= (Linux: =Alt+Shift+Right=) toggles checkbox item under cursor between checked and unchecked state.
+This command can also be used with selection to check (or uncheck) all checkboxes included in selected region.
 
 ** Archive
 Once you are done with your project you can move it to archive using =zorg_move_to_archive= (Linux: =Ctrl+Shift+A=). Archive filename is current filename with =_archive= suffix appended to it.
