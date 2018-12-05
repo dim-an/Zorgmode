@@ -70,6 +70,11 @@
         "context": [{
             "key": "selector",
             "operand": "entry.list.text.org | (heading & text.org)"
+        },
+        {
+            "key": "selection_empty",
+            "operand": true,
+            "match_all": true
         }]
     },
     {
@@ -78,6 +83,11 @@
         "context": [{
             "key": "selector",
             "operand": "entry.list.text.org | (heading & text.org)"
+        },
+        {
+            "key": "selection_empty",
+            "operand": true,
+            "match_all": true
         }]
     },
     {
