@@ -18,6 +18,12 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 | zorg_move_node_down            | ctrl+shift+down | headline, list item | moves current section (or list item) down                               |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_cut_node                  | ctrl+X          | headline, list item | cut section or list item                                                |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_copy_node                 | ctrl+C          | headline, list item | copy section or list item                                               |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
+| zorg_delete_node               | ctrl+shit+K     | headline, list item | delete section or list item                                             |
+|--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 | zorg_cycle_todo_state_forward  | alt+shift+right | headline            | Cycles forward project state between (=TODO=, =DONE=, =<empty state>=)  |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
 | zorg_cycle_todo_state_backward | alt+shift+left  | headline            | Cycles backward project state between (=TODO=, =DONE=, =<empty state>=) |
@@ -96,9 +102,19 @@ Zorgmode supports multiple types of links:
   4. Sections =[[Short command overview]]=. Zorgmode will set cursor to corresponding section.
 
 *** Link abbreviations
-You can create per document link abbreviations. To do this you should insert special line in any place of your document
+You can create link abbreviation. To create global link abbreviation use =zorg_link_abbrev_list= setting, for example:
+:    "zorg_link_abbrev_list": [
+:       {
+:           // [[gh:torvalds/linux]] -> [[http://github.com/torvalds/linux]]
+:           "scheme": "gh-user:",
+:           "expansion": "https://github.com/%s"
+:       },
+:    ],
+
+With such setting link =[[gh-user:torvalds]]=  will be interpreted by Zorgmode as =[[https://github.com/torvalds]]=.
+
+You can also create per document link abbreviations. To do this you should insert special line in any place of your document
 : #+LINK: gh-user https://github.com/%s
-Once line is inserted you can create links like this =[[gh-user:torvalds]]=. That link will be interpreted by Zorgmode as =[[https://github.com/torvalds]]=.
 
 ** Structural editing
 There are a number of commands that allow to swap, cut, copy or delete section or list entry.
@@ -126,7 +142,11 @@ Command =zorg_toggle_checkbox= (Linux: =Alt+Shift+Right=) toggles checkbox item 
 This command can also be used with selection to check (or uncheck) all checkboxes included in selected region.
 
 ** Archive
-Once you are done with your project you can move it to archive using =zorg_move_to_archive= (Linux: =Ctrl+Shift+A=). Archive filename is current filename with =_archive= suffix appended to it.
+Once you are done with your project you can move it to archive using =zorg_move_to_archive= (Linux: =Ctrl+Shift+A=). To set the archive file path insert control line
+: #+ARCHIVE: path/to/archive/file 
+in any place of your document.
+
+By default archive filename is current filename with =_archive= suffix appended to it. 
 
 ** Source code and examples
 There are multiple ways to include example or source code in your .org document:
