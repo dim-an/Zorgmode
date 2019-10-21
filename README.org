@@ -7,6 +7,10 @@ Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeT
 : cd /path/to/package/directory
 : git clone git@github.com:dim-an/Zorgmode.git
 
+* Screenshot
+
+[[screenshot.png][file:screenshot.png]]
+
 * Short command overview
 |            Command             |   Keys (Linux)  |       Context       |                                 Comment                                 |
 |--------------------------------+-----------------+---------------------+-------------------------------------------------------------------------|
