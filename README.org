@@ -1,5 +1,8 @@
 Zorgmode is an implementation of [[https://orgmode.org/][org mode]] for SublimeText 3.
 
+This plugin was tested on Linux. I hope it would work on Windows and OSX
+machines without any modifications, but I never had a chance to test that.
+
 [[https://travis-ci.org/dim-an/Zorgmode/][file:https://travis-ci.org/dim-an/Zorgmode.svg?branch=master]]
 
 * Installation
