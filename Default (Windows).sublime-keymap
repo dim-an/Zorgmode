@@ -1,0 +1,165 @@
+[
+	/* Orgmode */
+    {
+        "keys": ["alt+shift+right"],
+        "command": "zorg_cycle_todo_state_forward",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["alt+shift+left"],
+        "command": "zorg_cycle_todo_state_backward",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["tab"],
+        "command": "zorg_cycle",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["shift+tab"],
+        "command": "zorg_cycle_all",
+        "context": [{
+                "key": "selector",
+                "operand": "text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+up"],
+        "command": "zorg_move_node_up",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+up"],
+        "command": "zorg_move_node_up",
+        "context": [{
+                "key": "selector",
+                "operand": "entry.list.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+down"],
+        "command": "zorg_move_node_down",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+down"],
+        "command": "zorg_move_node_down",
+        "context": [{
+                "key": "selector",
+                "operand": "entry.list.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+x"],
+        "command": "zorg_cut_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        },
+        {
+            "key": "selection_empty",
+            "operand": true,
+            "match_all": true
+        }]
+    },
+    {
+        "keys": ["ctrl+c"],
+        "command": "zorg_copy_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        },
+        {
+            "key": "selection_empty",
+            "operand": true,
+            "match_all": true
+        }]
+    },
+    {
+        "keys": ["ctrl+shift+k"],
+        "command": "zorg_delete_node",
+        "context": [{
+            "key": "selector",
+            "operand": "entry.list.text.org | (heading & text.org)"
+        }]
+    },
+    {
+        "keys": ["alt+shift+right"],
+        "command": "zorg_toggle_checkbox",
+        "context": [{
+                "key": "selector",
+                "operand": "entry.list.text.org"
+        }]
+    },
+    {
+        "keys": ["ctrl+c", "ctrl+c"],
+        "command": "zorg_toggle_checkbox",
+        "context": [
+            {
+                "key": "selector",
+                "operand": "entry.list.text.org"
+            },
+            {
+                "key": "selection_empty",
+                "operand": true,
+                "match_all": true
+            }
+        ]
+    },
+    {
+        "keys": ["ctrl+shift+a"],
+        "command": "zorg_move_to_archive",
+        "context": [{
+                "key": "selector",
+                "operand": "heading & text.org"
+        }]
+    },
+    {
+        "keys": ["enter"],
+        "command": "zorg_follow_link",
+        "context": [
+            {
+                "key": "selector",
+                "operator": "equal",
+                "operand": "link.text.org"
+            },
+            {
+                "key": "preceding_text",
+                "operator": "not_regex_contains",
+                "operand": "]]$"
+            },
+            {
+                "key": "following_text",
+                "operator": "not_regex_contains",
+                "operand": "^\\[\\["
+            },
+        ]
+    },
+    {
+        "keys": ["f5"],
+        "command": "zorg_todo_list",
+    },
+    {
+        "keys": ["tab"],
+        "command": "zorg_agenda_goto",
+        "context": [{
+                "key": "selector",
+                "operand": "item.agenda.text.org"
+        }]
+    },
+]
