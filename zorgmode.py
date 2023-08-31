@@ -225,7 +225,10 @@ class ZorgCycleCommand(sublime_plugin.TextCommand):
 
         # найти следующий headline того же типа или высшего
         next_headline_region = view.find(next_headline_re, current_line_region.b)
-        region_to_fold = sublime.Region(current_line_region.b, next_headline_region.a - 1)
+        if view.classify(next_headline_region.a - 1) & sublime.CLASS_EMPTY_LINE:
+            region_to_fold = sublime.Region(current_line_region.b, next_headline_region.a - 2)
+        else:
+            region_to_fold = sublime.Region(current_line_region.b, next_headline_region.a - 1)
         if region_to_fold.empty():
             return
         if not is_straight_region(region_to_fold):
